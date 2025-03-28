@@ -16,10 +16,16 @@ def _parse(parser):
     """
 
     subparsers = parser.add_subparsers(dest="operation", required=True)
-    subparsers.add_parser(
+    list_parser = subparsers.add_parser(
         "list",
         help=_list_runtimes.__doc__.split("\n")[0],
         description=_list_runtimes.__doc__.split("\n")[0],
+    )
+
+    list_parser.add_argument(
+        "--runtimes-file",
+        default="runtimes/runtimes.json",
+        help="Path to the JSON file containing runtimes (default: runtimes/runtimes.json)",
     )
 
     for subparser in subparsers.choices.values():
@@ -67,6 +73,6 @@ def _list_runtimes(file="runtimes/runtimes.json"):
 def _main(args):
     logging.getLogger().setLevel(getattr(logging, args.log_level.upper()))
     if args.operation == "list":
-        _list_runtimes()
+        _list_runtimes(args.runtimes_file)
     else:
         print("Unknown operation. Use 'list' to see available runtimes.")
