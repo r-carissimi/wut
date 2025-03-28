@@ -1,4 +1,6 @@
-"""Webassembly benchmarks management"""
+"""Webassembly benchmarks management
+
+This module provides a command-line interface (CLI) for managing WebAssembly benchmarks."""
 
 import logging
 import os
@@ -39,7 +41,7 @@ def _list_benchmarks(folder="benchmarks"):
     """List available benchmarks.
 
     Args:
-                folder (str): Path to the folder containing benchmarks.
+        folder (str): Path to the folder containing benchmarks.
     """
 
     if not os.path.exists(folder):
