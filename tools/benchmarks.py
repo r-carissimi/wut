@@ -16,12 +16,12 @@ def parse(parser):
     subparsers = parser.add_subparsers(dest="operation", required=True)
     list_parser = subparsers.add_parser(
         "list",
-        help=_list_benchmarks.__doc__.split("\n")[0],
-        description=_list_benchmarks.__doc__.split("\n")[0],
+        help=list_benchmarks.__doc__.split("\n")[0],
+        description=list_benchmarks.__doc__.split("\n")[0],
     )
 
     list_parser.add_argument(
-        "--folder",
+        "--benchmarks-folder",
         default="benchmarks",
         help="Path to the folder containing benchmarks (default: benchmarks)",
     )
@@ -37,19 +37,29 @@ def parse(parser):
     return parser
 
 
-def _list_benchmarks(folder="benchmarks"):
+def list_benchmarks(folder="benchmarks"):
     """List available benchmarks.
 
     Args:
-        folder (str): Path to the folder containing benchmarks.
+        folder (str): Path to the folder containing benchmarks. Folder must
+                      exist but can be empty.
+
+    Returns:
+        list: List of available benchmarks, defined as all .wasm files in
+              the folder and its subfolders. list is empty if no .wasm files
+              are found.
+
+    Raises:
+        FileNotFoundError: If the specified folder does not exist.
+        NotADirectoryError: If the specified path is not a directory.
     """
 
     if not os.path.exists(folder):
         logging.error(f"{folder} folder not found.")
-        return
+        raise FileNotFoundError(f"{folder} folder not found.")
     if not os.path.isdir(folder):
         logging.error(f"{folder} is not a directory.")
-        return
+        raise NotADirectoryError(f"{folder} is not a directory.")
 
     # Recursive search for .wasm files
     benchmarks = []
@@ -60,19 +70,21 @@ def _list_benchmarks(folder="benchmarks"):
             if f.endswith(".wasm")
         )
 
-    if not benchmarks:
-        logging.warning("No benchmarks found.")
-        print("No benchmarks found.")
-        return
-
-    print("Available benchmarks:")
-    for benchmark in benchmarks:
-        print(f"  - {benchmark}")
+    return benchmarks
 
 
 def main(args):
     logging.getLogger().setLevel(getattr(logging, args.log_level.upper()))
     if args.operation == "list":
-        _list_benchmarks(args.folder)
+        benchmarks = list_benchmarks(args.benchmarks_folder)
+
+        if not benchmarks:
+            logging.warning("No benchmarks found.")
+            print("No benchmarks found.")
+            return
+
+        print("Available benchmarks:")
+        for benchmark in list_benchmarks(args.benchmarks_folder):
+            print(f"  - {benchmark}")
     else:
         print("Unknown operation. Use 'list' to see available runtimes.")
