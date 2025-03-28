@@ -1,0 +1,14 @@
+{
+"runtimes": [
+        {
+            "name": "wasmtime",
+            "command": "wasmtime",
+            "desc": "Wasmtime is a standalone JIT-style runtime for WebAssembly"
+        },
+        {
+			"name": "wasmer",
+			"command": "wasmer",
+			"desc": "Wasmer is a standalone WebAssembly runtime that can run WebAssembly binaries"
+		}
+    ]
+}

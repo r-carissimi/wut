@@ -10,7 +10,7 @@ def setup_subparsers(parser, commands):
     subparser = parser.add_subparsers(dest="command", required=True)
     for name, command in commands.items():
         cmd_parser = subparser.add_parser(
-            name, help=command.__desc, description=command.__desc
+            name, help=command.__doc__, description=command.__doc__
         )
         command._parse(cmd_parser)
         cmd_parser.set_defaults(_func=command._main)
