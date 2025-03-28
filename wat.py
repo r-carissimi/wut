@@ -2,6 +2,8 @@ from argparse import ArgumentParser
 
 from tools import commands
 
+VERSION = "0.1α (2025-03-28)"
+
 
 def setup_subparsers(parser, commands):
     """Set up subparsers for the given commands."""
@@ -16,6 +18,7 @@ def setup_subparsers(parser, commands):
 
 def main():
     parser = ArgumentParser(description="WAT - WAT Analyzes Timing")
+    parser.add_argument("--version", action="version", version=f"WAT {VERSION}")
     setup_subparsers(parser, commands)
 
     args = parser.parse_args()
