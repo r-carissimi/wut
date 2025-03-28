@@ -8,7 +8,7 @@ import logging
 import os
 
 
-def _parse(parser):
+def parse(parser):
     """Parse command-line arguments for the runtime module.
 
     Args:
@@ -70,7 +70,7 @@ def _list_runtimes(file="runtimes/runtimes.json"):
             return
 
 
-def _main(args):
+def main(args):
     logging.getLogger().setLevel(getattr(logging, args.log_level.upper()))
     if args.operation == "list":
         _list_runtimes(args.runtimes_file)

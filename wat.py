@@ -16,8 +16,8 @@ def setup_subparsers(parser, commands):
             description=command.__doc__.split("\n")[0],
             add_help=True,
         )
-        command._parse(cmd_parser)
-        cmd_parser.set_defaults(_func=command._main)
+        command.parse(cmd_parser)
+        cmd_parser.set_defaults(_func=command.main)
 
 
 def setup_logging(level=logging.WARNING):
