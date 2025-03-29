@@ -1,6 +1,7 @@
 """Webassembly benchmarks management
 
-This module provides a command-line interface (CLI) for managing WebAssembly benchmarks."""
+This module provides a command-line interface (CLI) for managing WebAssembly benchmarks.
+"""
 
 import json
 import logging
@@ -109,7 +110,9 @@ def list_groups(folder="benchmarks"):
 
     Args:
         folder (str): Path to the folder containing benchmarks. Folder must
-                      exist but can be empty.
+                      exist but can be empty. Note that no group should be called
+                      "all" as this is reserved for selecting all benchmarks.
+                      The group will not be able to be used.
 
     Returns:
         list: List of benchmark groups, defined as all subfolders in the
@@ -188,6 +191,52 @@ def list_benchmarks(folder="benchmarks"):
         logging.debug(f"Found benchmarks: {benchmarks[group]}")
 
     return benchmarks
+
+
+def get_benchmark_from_name(name):
+    """Get benchmark information from a name.
+    Args:
+        name (str): Name of the benchmark. Can be a group name or a
+                    group/benchmark name.
+                    Example: "coremark" or "coremark/coremark-1000"
+    Returns:
+        dict: Dictionary containing benchmark information. Returns None if
+              the benchmark is not found. A single benchmark is returned in a
+              list with the name of its group.
+
+              Example:
+                {
+                "coremark": [
+                        {
+                            "name": "coremark-1000",
+                            "path": "coremark-1000.wasm"
+                        }
+                    ]
+                }
+    """
+    if not name:
+        return None
+
+    benchmarks = list_benchmarks()
+
+    if name in benchmarks:
+        return {name: benchmarks[name]}
+
+    name = name.split("/")
+    if len(name) != 2:
+        logging.warning(f"Invalid benchmark name: {name}.")
+        return None
+    group = name[0]
+    benchmark = name[1]
+    if group not in benchmarks:
+        logging.warning(f"Benchmark group {group} not found.")
+        return None
+    for b in benchmarks[group]:
+        if b["name"] == benchmark:
+            return {group: [b]}
+
+    logging.warning(f"Benchmark {benchmark} not found in group {group}.")
+    return None
 
 
 def main(args):

@@ -1,6 +1,7 @@
-from . import benchmarks, runtime
+from . import benchmarks, run, runtime
 
 commands: dict = {
-    "runtime": runtime,
     "benchmarks": benchmarks,
+    "run": run,
+    "runtime": runtime,
 }

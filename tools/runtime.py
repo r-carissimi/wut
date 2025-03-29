@@ -1,4 +1,4 @@
-"""WebAssembly runtime management
+"""WebAssembly runtimes management
 
 This module provides a command-line interface (CLI) for managing WebAssembly runtimes.
 """
@@ -45,6 +45,8 @@ def list_runtimes(file="runtimes/runtimes.json"):
     Args:
         file (str): Path to the JSON file containing runtimes. File must
                     exist but can be empty.
+                    Note that no runtime should be called "all" as that
+                    is reserved for selecting all the runtimes.
 
     Returns:
         list: List of available runtimes, defined as a list of dictionaries
@@ -85,6 +87,31 @@ def list_runtimes(file="runtimes/runtimes.json"):
             return list()
 
         return runtime_list["runtimes"]
+
+
+def get_runtime_from_name(name):
+    """Get runtime information from a name.
+
+    Args:
+        name (str): Name of the runtime.
+
+    Returns:
+        dict: Dictionary containing runtime information. Returns None if
+              the runtime is not found.
+              Example:
+                {
+                    "name": "wasmtime",
+                    "desc": "A standalone WebAssembly runtime",
+                    "version": "0.30.0"
+                }
+    """
+
+    runtimes_list = list_runtimes()
+    for runtime in runtimes_list:
+        if runtime["name"] == name:
+            return runtime
+    logging.warning(f"Runtime {name} not found.")
+    return None
 
 
 def main(args):
