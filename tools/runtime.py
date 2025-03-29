@@ -98,7 +98,7 @@ def main(args):
         print("Runtimes available:")
         for runtime in runtimes_list:
             logging.debug(f"Found runtime: {runtime}")
-            print(f"  - {runtime['name']}: {runtime['desc']}")
+            print(f" * {runtime['name']}: {runtime['desc']}")
 
     else:
         print("Unknown operation. Use 'list' to see available runtimes.")

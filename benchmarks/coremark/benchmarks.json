@@ -1,0 +1,44 @@
+{
+	"benchmarks": [
+		{
+			"name": "coremark-1000",
+			"path": "coremark-1000.wasm",
+			"args": [
+
+			],
+			"score-parser": ""
+		},
+		{
+			"name": "coremark-5000",
+			"path": "coremark-5000.wasm",
+			"args": [
+
+			],
+			"score-parser": ""
+		},
+		{
+			"name": "coremark-11000",
+			"path": "coremark-11000.wasm",
+			"args": [
+
+			],
+			"score-parser": ""
+		},
+		{
+			"name": "coremark-minimal",
+			"path": "coremark-minimal.wasm",
+			"args": [
+
+			],
+			"score-parser": ""
+		},
+		{
+			"name": "coremark",
+			"path": "coremark.wasm",
+			"args": [
+
+			],
+			"score-parser": ""
+		}
+	]
+}
