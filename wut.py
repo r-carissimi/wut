@@ -29,7 +29,7 @@ def setup_logging(level=logging.WARNING):
 
 
 def main():
-    parser = ArgumentParser(description="WAT - WAT Analyzes Timing")
+    parser = ArgumentParser(description="WUT - WUT Understands Timing")
     parser.add_argument("--version", action="version", version=f"WAT {VERSION}")
     parser.add_argument(
         "--log-level",
