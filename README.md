@@ -1,5 +1,7 @@
-![WAT Logo](assets/wat.jpg)
+<img src="assets/logo.png" width="200">
 
-# WAT: WAT Analyzes Timing
+# WUT - WUT Understands Timing
+
+> A WebAssembly benchmarking toolkit for confused humans
 
 This is very much a work in progress.
