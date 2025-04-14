@@ -105,5 +105,6 @@ def main(args):
         logging.debug(f"Using runtime: {r}")
         for b in _get_benchmarks_paths(benchmarks_list):
             # TODO actually run the benchmark
+            # TODO maybe it's better to use the objects for the iteration and not the paths
 
             logging.info(f"Running benchmark: {b} with runtime: {r}")
