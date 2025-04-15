@@ -31,7 +31,7 @@ def parse(parser):
     for subparser in subparsers.choices.values():
         subparser.add_argument(
             "--log-level",
-            default="WARNING",
+            default="INFO",
             choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
             help="Set the logging level (default: WARNING)",
         )

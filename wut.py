@@ -33,7 +33,7 @@ def main():
     parser.add_argument("--version", action="version", version=f"WAT {VERSION}")
     parser.add_argument(
         "--log-level",
-        default="WARNING",
+        default="INFO",
         choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
         help="Set the logging level (default: WARNING)",
     )

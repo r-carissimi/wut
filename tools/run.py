@@ -2,6 +2,7 @@
 
 import logging
 import os
+import time
 
 from . import benchmarks, runtime
 
@@ -33,7 +34,7 @@ def parse(parser):
 
     parser.add_argument(
         "--log-level",
-        default="WARNING",
+        default="INFO",
         choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
         help="Set the logging level (default: WARNING)",
     )
@@ -122,6 +123,42 @@ def _get_benchmarks(benchmarks_list):
     ]
 
 
+def _run_benchmark_with_runtime(benchmark, runtime):
+    """Run a benchmark with a given runtime.
+
+    Args:
+        benchmark (dict): The benchmark to run.
+        runtime (dict): The runtime to use.
+
+    Returns:
+        tuple: A tuple containing
+               * elapsed time: The elapsed time of the benchmark in nanoseconds
+               * score: The score of the benchmark (if applicable)
+               * return code: The return code of the benchmark
+               * output: The output of the benchmark as a string
+    """
+
+    benchmark_path = os.path.join(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+        "benchmarks",
+        benchmark["path"],
+    )
+
+    logging.debug(f"Running '{runtime} {benchmark_path}'")
+
+    start_time = time.perf_counter_ns()
+    process = os.popen(f"{runtime} {benchmark_path}")
+    output = process.read()
+    end_time = time.perf_counter_ns()
+    elapsed_time = end_time - start_time
+
+    return_code = process.close() or 0
+
+    logging.debug(f"Output: {output}")
+
+    return elapsed_time, 0, return_code, output
+
+
 def main(args):
     logging.getLogger().setLevel(getattr(logging, args.log_level.upper()))
 
@@ -149,11 +186,11 @@ def main(args):
         for b in _get_benchmarks(benchmarks_list):
             logging.info(f"Running benchmark: {b} with runtime: {r}")
 
-            benchmark_path = os.path.join(
-                os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-                "benchmarks",
-                b["path"],
-            )
-            logging.debug(f"Running '{r} {benchmark_path}'")
-            output = os.popen(f"{r} {benchmark_path}").read()
-            logging.debug(f"Output: {output}")
+            elapsed_time, _, return_code, _ = _run_benchmark_with_runtime(b, r)
+
+            logging.info(f"Elapsed time: {elapsed_time} ns")
+            logging.debug(f"Return code: {return_code}")
+            if return_code != 0:
+                logging.warning(
+                    f"Benchmark {b['name']} failed with return code {return_code}"
+                )
