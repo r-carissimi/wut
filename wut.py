@@ -35,7 +35,7 @@ def main():
         "--log-level",
         default="INFO",
         choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
-        help="Set the logging level (default: WARNING)",
+        help="Set the logging level (default: INFO)",
     )
     setup_subparsers(parser, commands)
 

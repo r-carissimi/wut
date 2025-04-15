@@ -33,16 +33,24 @@ def parse(parser):
     )
 
     parser.add_argument(
+        "--benchmarks-folder",
+        default="benchmarks",
+        help="Path to the folder containing benchmarks (default: benchmarks)",
+    )
+
+    parser.add_argument(
         "--log-level",
         default="INFO",
         choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
-        help="Set the logging level (default: WARNING)",
+        help="Set the logging level (default: INFO)",
     )
 
     return parser
 
 
 def _get_runtimes_from_names(runtimes_list):
+    # TODO: add support for runtimes with relative path (by prepending the runtime folder)
+
     runtimes = []
     for runtime_name in runtimes_list:
         if runtime_name == "all":
@@ -123,7 +131,7 @@ def _get_benchmarks(benchmarks_list):
     ]
 
 
-def _run_benchmark_with_runtime(benchmark, runtime):
+def _run_benchmark_with_runtime(benchmark, runtime, benchmarks_folder):
     """Run a benchmark with a given runtime.
 
     Args:
@@ -140,7 +148,7 @@ def _run_benchmark_with_runtime(benchmark, runtime):
 
     benchmark_path = os.path.join(
         os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-        "benchmarks",
+        benchmarks_folder,
         benchmark["path"],
     )
 
@@ -186,7 +194,9 @@ def main(args):
         for b in _get_benchmarks(benchmarks_list):
             logging.info(f"Running benchmark: {b} with runtime: {r}")
 
-            elapsed_time, _, return_code, _ = _run_benchmark_with_runtime(b, r)
+            elapsed_time, _, return_code, _ = _run_benchmark_with_runtime(
+                b, r, args.benchmarks_folder
+            )
 
             logging.info(f"Elapsed time: {elapsed_time} ns")
             logging.debug(f"Return code: {return_code}")

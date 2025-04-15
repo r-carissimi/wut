@@ -33,7 +33,7 @@ def parse(parser):
             "--log-level",
             default="INFO",
             choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
-            help="Set the logging level (default: WARNING)",
+            help="Set the logging level (default: INFO)",
         )
 
     return parser
