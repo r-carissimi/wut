@@ -89,7 +89,7 @@ def list_runtimes(file="runtimes/runtimes.json"):
         return runtime_list["runtimes"]
 
 
-def get_runtime_from_name(name):
+def get_runtime_from_name(name, file="runtimes/runtimes.json"):
     """Get runtime information from a name.
 
     Args:
@@ -106,7 +106,7 @@ def get_runtime_from_name(name):
                 }
     """
 
-    runtimes_list = list_runtimes()
+    runtimes_list = list_runtimes(file)
     for runtime in runtimes_list:
         if runtime["name"] == name:
             return runtime

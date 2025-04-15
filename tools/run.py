@@ -39,6 +39,12 @@ def parse(parser):
     )
 
     parser.add_argument(
+        "--runtimes-file",
+        default="runtimes/runtimes.json",
+        help="Path to the JSON file containing runtimes (default: runtimes/runtimes.json)",
+    )
+
+    parser.add_argument(
         "--log-level",
         default="INFO",
         choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
@@ -61,10 +67,6 @@ def _get_runtimes_from_names(runtimes_list):
             runtimes.append(r)
 
     return runtimes
-
-
-def _get_runtime_paths(runtimes_list):
-    return [r["command"] for r in runtimes_list]
 
 
 def _get_benchmarks_from_names(benchmarks_list):
@@ -152,10 +154,10 @@ def _run_benchmark_with_runtime(benchmark, runtime, benchmarks_folder):
         benchmark["path"],
     )
 
-    logging.debug(f"Running '{runtime} {benchmark_path}'")
+    logging.debug(f"Running '{runtime['command']} {benchmark_path}'")
 
     start_time = time.perf_counter_ns()
-    process = os.popen(f"{runtime} {benchmark_path}")
+    process = os.popen(f"{runtime['command']} {benchmark_path}")
     output = process.read()
     end_time = time.perf_counter_ns()
     elapsed_time = end_time - start_time
@@ -163,6 +165,8 @@ def _run_benchmark_with_runtime(benchmark, runtime, benchmarks_folder):
     return_code = process.close() or 0
 
     logging.debug(f"Output: {output}")
+
+    # TODO: implement parsing of the output to get the score
 
     return elapsed_time, 0, return_code, output
 
@@ -173,9 +177,9 @@ def main(args):
     # Get the runtime objects from the command line arguments
     runtimes_list = args.runtimes
     if runtimes_list == ["all"]:
-        runtimes_list = runtime.list_runtimes()
+        runtimes_list = runtime.list_runtimes(file=args.runtimes_file)
     else:
-        runtimes_list = _get_runtimes_from_names(runtimes_list)
+        runtimes_list = _get_runtimes_from_names(runtimes_list, file=args.runtimes_file)
 
     logging.debug(f"Using runtimes: {[r['name'] for r in runtimes_list]}")
 
@@ -189,10 +193,13 @@ def main(args):
     logging.debug(f"Using benchmarks: {benchmarks_list}")
 
     # Run the benchmarks with the runtimes
-    for r in _get_runtime_paths(runtimes_list):
-        logging.debug(f"Using runtime: {r}")
+    results = dict()
+
+    for r in runtimes_list:
+        logging.debug(f"Using runtime: {r['name']}")
+        results[r["name"]] = dict()
         for b in _get_benchmarks(benchmarks_list):
-            logging.info(f"Running benchmark: {b} with runtime: {r}")
+            logging.info(f"Running benchmark: {b['name']} with runtime: {r['name']}")
 
             elapsed_time, _, return_code, _ = _run_benchmark_with_runtime(
                 b, r, args.benchmarks_folder
@@ -204,3 +211,10 @@ def main(args):
                 logging.warning(
                     f"Benchmark {b['name']} failed with return code {return_code}"
                 )
+                elapsed_time = 0
+
+            results[r["name"]][b["name"]] = elapsed_time
+
+    logging.debug(f"Results: {results}")
+
+    # TODO: save the results to a file
