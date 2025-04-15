@@ -3,7 +3,7 @@ from argparse import ArgumentParser
 
 from tools import commands
 
-VERSION = "0.1α (2025-03-28)"
+VERSION = "0.2α (2025-04-15)"
 
 
 def setup_subparsers(parser, commands):
