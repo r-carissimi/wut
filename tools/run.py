@@ -1,4 +1,9 @@
-"""Runs benchmarks using runtimes"""
+"""Runs benchmarks using runtimes
+
+This module provides a command-line interface to run benchmarks using
+different runtimes. It allows users to specify which benchmarks and
+runtimes to use, and saves the results to a specified folder.
+"""
 
 import json
 import logging
