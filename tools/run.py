@@ -1,6 +1,7 @@
 """Runs benchmarks using runtimes"""
 
 import logging
+import os
 
 from . import benchmarks, runtime
 
@@ -148,4 +149,11 @@ def main(args):
         for b in _get_benchmarks(benchmarks_list):
             logging.info(f"Running benchmark: {b} with runtime: {r}")
 
-            # TODO actually run the benchmark
+            benchmark_path = os.path.join(
+                os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                "benchmarks",
+                b["path"],
+            )
+            logging.debug(f"Running '{r} {benchmark_path}'")
+            output = os.popen(f"{r} {benchmark_path}").read()
+            logging.debug(f"Output: {output}")

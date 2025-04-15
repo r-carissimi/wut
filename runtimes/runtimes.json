@@ -2,12 +2,12 @@
 "runtimes": [
         {
             "name": "wasmtime",
-            "command": "wasmtime",
+            "command": "/opt/homebrew/bin/wasmtime",
             "desc": "Wasmtime is a standalone JIT-style runtime for WebAssembly"
         },
         {
             "name": "wasmer",
-            "command": "wasmer",
+            "command": "/opt/homebrew/bin/wasmer",
             "desc": "Wasmer is a standalone WebAssembly runtime that can run WebAssembly binaries"
         }
     ]
