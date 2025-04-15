@@ -1,5 +1,6 @@
 """Runs benchmarks using runtimes"""
 
+import json
 import logging
 import os
 import time
@@ -42,6 +43,12 @@ def parse(parser):
         "--runtimes-file",
         default="runtimes/runtimes.json",
         help="Path to the JSON file containing runtimes (default: runtimes/runtimes.json)",
+    )
+
+    parser.add_argument(
+        "--results-folder",
+        default="results",
+        help="Path to the folder where results will be saved (default: results)",
     )
 
     parser.add_argument(
@@ -171,6 +178,17 @@ def _run_benchmark_with_runtime(benchmark, runtime, benchmarks_folder):
     return elapsed_time, 0, return_code, output
 
 
+def _save_results_to_file(results, folder="results"):
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+
+    filename = os.path.join(folder, time.strftime("%Y-%m-%d_%H-%M-%S.json"))
+    with open(filename, "w") as f:
+        json.dump(results, f, indent=4)
+
+    logging.info(f"Results saved to {filename}")
+
+
 def main(args):
     logging.getLogger().setLevel(getattr(logging, args.log_level.upper()))
 
@@ -217,4 +235,4 @@ def main(args):
 
     logging.debug(f"Results: {results}")
 
-    # TODO: save the results to a file
+    _save_results_to_file(results, folder=args.results_folder)
