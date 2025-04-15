@@ -58,12 +58,12 @@ def list_runtimes(file="runtimes/runtimes.json"):
                     {
                         "name": "wasmtime",
                         "desc": "A standalone WebAssembly runtime",
-                        "version": "0.30.0"
+                        "command": "/usr/bin/wasmtime",
                     },
                     {
                         "name": "wasmer",
                         "desc": "A WebAssembly runtime for embedding in other languages",
-                        "version": "2.0.0"
+                        "command": "/usr/bin/wasmer",
                     }
                 ]
 
@@ -102,7 +102,7 @@ def get_runtime_from_name(name, file="runtimes/runtimes.json"):
                 {
                     "name": "wasmtime",
                     "desc": "A standalone WebAssembly runtime",
-                    "version": "0.30.0"
+                    "command": "/usr/bin/wasmtime"
                 }
     """
 

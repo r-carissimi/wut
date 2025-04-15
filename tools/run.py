@@ -61,15 +61,13 @@ def parse(parser):
     return parser
 
 
-def _get_runtimes_from_names(runtimes_list):
-    # TODO: add support for runtimes with relative path (by prepending the runtime folder)
-
+def _get_runtimes_from_names(runtimes_list, file="runtimes/runtimes.json"):
     runtimes = []
     for runtime_name in runtimes_list:
         if runtime_name == "all":
             continue
 
-        r = runtime.get_runtime_from_name(runtime_name)
+        r = runtime.get_runtime_from_name(runtime_name, file)
         if r is not None:
             runtimes.append(r)
 
@@ -198,6 +196,14 @@ def main(args):
         runtimes_list = runtime.list_runtimes(file=args.runtimes_file)
     else:
         runtimes_list = _get_runtimes_from_names(runtimes_list, file=args.runtimes_file)
+
+    # If path to the runtimes is not absolute, prepend the path to the runtimes folder
+    for r in runtimes_list:
+        if not os.path.isabs(r["command"]):
+            r["command"] = os.path.join(
+                os.path.dirname(os.path.abspath(args.runtimes_file)),
+                r["command"],
+            )
 
     logging.debug(f"Using runtimes: {[r['name'] for r in runtimes_list]}")
 
