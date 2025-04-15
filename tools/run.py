@@ -1,7 +1,6 @@
 """Runs benchmarks using runtimes"""
 
 import logging
-import os
 
 from . import benchmarks, runtime
 
@@ -73,18 +72,59 @@ def _get_benchmarks_from_names(benchmarks_list):
     return benchs
 
 
-def _get_benchmarks_paths(benchmarks_list):
-    paths = list()
+def _get_benchmarks(benchmarks_list):
+    """This function takes a dict of benchmark groups and returns a list of
+    benchmarks, without their group. It also adds the group name to the
+    path of each benchmark, thus having the full path for each benchmark in the
+    object itself.
 
-    for group, b in benchmarks_list.items():
-        paths.extend([os.path.join(group, benchmark["path"]) for benchmark in b])
+    This is the input format:
 
-    return paths
+    {
+        "group_name": [
+            {
+                "name": "benchmark1",
+                "path": "path/to/benchmark1"
+                ...
+            },
+            {
+                "name": "benchmark2",
+                "path": "path/to/benchmark2"
+                ...
+            },
+            ...
+        ],
+        ""group_name2": [...]
+    }
+
+    This is the output format:
+
+    [
+        {
+            "name": "benchmark1",
+            "path": "group_name/path/to/benchmark1"
+            ...
+        },
+        {
+            "name": "benchmark2",
+            "path": "group_name/path/to/benchmark2"
+            ...
+        },
+        ...
+    ]
+    """
+
+    return [
+        {**b, "path": f"{group_name}/{b['path']}"}
+        for group_name, group_list in benchmarks_list.items()
+        for b in group_list
+    ]
 
 
 def main(args):
     logging.getLogger().setLevel(getattr(logging, args.log_level.upper()))
 
+    # Get the runtime objects from the command line arguments
     runtimes_list = args.runtimes
     if runtimes_list == ["all"]:
         runtimes_list = runtime.list_runtimes()
@@ -93,6 +133,7 @@ def main(args):
 
     logging.debug(f"Using runtimes: {[r['name'] for r in runtimes_list]}")
 
+    # Get the benchmark objects from the command line arguments
     benchmarks_list = args.benchmarks
     if benchmarks_list == ["all"]:
         benchmarks_list = benchmarks.list_benchmarks()
@@ -101,10 +142,10 @@ def main(args):
 
     logging.debug(f"Using benchmarks: {benchmarks_list}")
 
+    # Run the benchmarks with the runtimes
     for r in _get_runtime_paths(runtimes_list):
         logging.debug(f"Using runtime: {r}")
-        for b in _get_benchmarks_paths(benchmarks_list):
-            # TODO actually run the benchmark
-            # TODO maybe it's better to use the objects for the iteration and not the paths
-
+        for b in _get_benchmarks(benchmarks_list):
             logging.info(f"Running benchmark: {b} with runtime: {r}")
+
+            # TODO actually run the benchmark
