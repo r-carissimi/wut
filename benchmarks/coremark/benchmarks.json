@@ -6,7 +6,7 @@
 			"args": [
 
 			],
-			"score-parser": ""
+			"score-parser": "Iterations/Sec\\s*:\\s*(?P<score>[0-9]+\\.[0-9]+)"
 		},
 		{
 			"name": "coremark-5000",
@@ -14,7 +14,7 @@
 			"args": [
 
 			],
-			"score-parser": ""
+			"score-parser": "Iterations/Sec\\s*:\\s*(?P<score>[0-9]+\\.[0-9]+)"
 		},
 		{
 			"name": "coremark-11000",
@@ -22,7 +22,7 @@
 			"args": [
 
 			],
-			"score-parser": ""
+			"score-parser": "Iterations/Sec\\s*:\\s*(?P<score>[0-9]+\\.[0-9]+)"
 		},
 		{
 			"name": "coremark-minimal",
@@ -30,7 +30,7 @@
 			"args": [
 
 			],
-			"score-parser": ""
+			"score-parser": "Iterations/Sec\\s*:\\s*(?P<score>[0-9]+\\.[0-9]+)"
 		},
 		{
 			"name": "coremark",
@@ -38,7 +38,7 @@
 			"args": [
 
 			],
-			"score-parser": ""
+			"score-parser": "Iterations/Sec\\s*:\\s*(?P<score>[0-9]+\\.[0-9]+)"
 		}
 	]
 }

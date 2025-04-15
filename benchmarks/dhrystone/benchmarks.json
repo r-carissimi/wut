@@ -6,7 +6,7 @@
 			"args": [
 
 			],
-			"score-parser": ""
+			"score-parser": "Dhrystones per Second:\\s+(?P<score>\\d+)"
 		},
 		{
 			"name": "dhrystone1M",
@@ -14,7 +14,7 @@
 			"args": [
 
 			],
-			"score-parser": ""
+			"score-parser": "Dhrystones per Second:\\s+(?P<score>\\d+)"
 		},
 		{
 			"name": "dhrystone10M",
@@ -22,7 +22,7 @@
 			"args": [
 
 			],
-			"score-parser": ""
+			"score-parser": "Dhrystones per Second:\\s+(?P<score>\\d+)"
 		},
 		{
 			"name": "dhrystone100M",
@@ -30,7 +30,7 @@
 			"args": [
 
 			],
-			"score-parser": ""
+			"score-parser": "Dhrystones per Second:\\s+(?P<score>\\d+)"
 		},
 		{
 			"name": "dhrystoneMAX",
@@ -38,7 +38,7 @@
 			"args": [
 
 			],
-			"score-parser": ""
+			"score-parser": "Dhrystones per Second:\\s+(?P<score>\\d+)"
 		}
 	]
 }

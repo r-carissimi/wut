@@ -3,6 +3,7 @@
 import json
 import logging
 import os
+import re
 import time
 
 from . import benchmarks, runtime
@@ -138,6 +139,13 @@ def _get_benchmarks(benchmarks_list):
     ]
 
 
+def _parse_score(output, score_parser):
+    match = re.search(score_parser, output)
+    if match:
+        return float(match.group("score"))
+    return 0
+
+
 def _run_benchmark_with_runtime(benchmark, runtime, benchmarks_folder):
     """Run a benchmark with a given runtime.
 
@@ -171,9 +179,11 @@ def _run_benchmark_with_runtime(benchmark, runtime, benchmarks_folder):
 
     logging.debug(f"Output: {output}")
 
-    # TODO: implement parsing of the output to get the score
+    score = 0
+    if benchmark["score-parser"] is not None:
+        score = _parse_score(output, benchmark["score-parser"])
 
-    return elapsed_time, 0, return_code, output
+    return elapsed_time, score, return_code, output
 
 
 def _save_results_to_file(results, folder="results"):
@@ -225,19 +235,24 @@ def main(args):
         for b in _get_benchmarks(benchmarks_list):
             logging.info(f"Running benchmark: {b['name']} with runtime: {r['name']}")
 
-            elapsed_time, _, return_code, _ = _run_benchmark_with_runtime(
+            elapsed_time, score, return_code, _ = _run_benchmark_with_runtime(
                 b, r, args.benchmarks_folder
             )
 
             logging.info(f"Elapsed time: {elapsed_time} ns")
+            logging.info(f"Score: {score}")
             logging.debug(f"Return code: {return_code}")
             if return_code != 0:
                 logging.warning(
                     f"Benchmark {b['name']} failed with return code {return_code}"
                 )
                 elapsed_time = 0
+                score = 0
 
-            results[r["name"]][b["name"]] = elapsed_time
+            results[r["name"]][b["name"]] = {
+                "elapsed_time": elapsed_time,
+                "score": score,
+            }
 
     logging.debug(f"Results: {results}")
 
