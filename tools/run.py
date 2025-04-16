@@ -40,6 +40,13 @@ def parse(parser):
     )
 
     parser.add_argument(
+        "--no-store-output",
+        action="store_true",
+        default=False,
+        help="Do not save the output of the benchmarks to the results file (default: False)",
+    )
+
+    parser.add_argument(
         "--benchmarks-folder",
         default="benchmarks",
         help="Path to the folder containing benchmarks (default: benchmarks)",
@@ -240,7 +247,7 @@ def main(args):
         for b in _get_benchmarks(benchmarks_list):
             logging.info(f"Running benchmark: {b['name']} with runtime: {r['name']}")
 
-            elapsed_time, score, return_code, _ = _run_benchmark_with_runtime(
+            elapsed_time, score, return_code, output = _run_benchmark_with_runtime(
                 b, r, args.benchmarks_folder
             )
 
@@ -254,9 +261,14 @@ def main(args):
                 elapsed_time = 0
                 score = 0
 
+            logging.debug(f"No store output enabled: {args.no_store_output}")
+
+            # Output is stored unless the user specified not to
             results[r["name"]][b["name"]] = {
                 "elapsed_time": elapsed_time,
                 "score": score,
+                "return_code": return_code,
+                **({"output": output} if not args.no_store_output else {}),
             }
 
     logging.debug(f"Results: {results}")
