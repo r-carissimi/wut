@@ -77,9 +77,9 @@ Example template for `benchmarks.json`
 
 ```json
 {
-	"name": "<name-of-the-runtime>",
-	"command": "<absolute-path-or-relative-to-the-runtime-folder>",
-	"desc": "<description-of-the-runtime>"
+    "name": "<name-of-the-runtime>",
+    "command": "<absolute-path-or-relative-to-the-runtime-folder>",
+    "desc": "<description-of-the-runtime>"
 }
 ```
 
