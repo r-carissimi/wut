@@ -66,9 +66,6 @@ Example template for `benchmarks.json`
             "name": "<name-of-the-benchmark>",
             "path": "<name-of-the-wasm-file>.wasm",
             "score-parser": "<regex-to-parse-the-score-from-the-output>"
-        },
-        {
-            ...
         }
     ]
 }
