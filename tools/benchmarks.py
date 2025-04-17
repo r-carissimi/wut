@@ -7,6 +7,8 @@ import json
 import logging
 import os
 
+from . import utils
+
 
 def parse(parser):
     """Parse command-line arguments for the benchmarks module.
@@ -29,12 +31,7 @@ def parse(parser):
     )
 
     for subparser in subparsers.choices.values():
-        subparser.add_argument(
-            "--log-level",
-            default="INFO",
-            choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
-            help="Set the logging level (default: INFO)",
-        )
+        utils.add_log_level_argument(subparser)
 
     return parser
 

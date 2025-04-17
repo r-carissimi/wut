@@ -1,7 +1,7 @@
 import logging
 from argparse import ArgumentParser
 
-from tools import commands
+from tools import commands, utils
 
 VERSION = "0.2α (2025-04-15)"
 
@@ -31,12 +31,7 @@ def setup_logging(level=logging.WARNING):
 def main():
     parser = ArgumentParser(description="WUT - WUT Understands Timing")
     parser.add_argument("--version", action="version", version=f"WAT {VERSION}")
-    parser.add_argument(
-        "--log-level",
-        default="INFO",
-        choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
-        help="Set the logging level (default: INFO)",
-    )
+    utils.add_log_level_argument(parser)
     setup_subparsers(parser, commands)
 
     args = parser.parse_args()

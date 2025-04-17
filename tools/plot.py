@@ -6,6 +6,8 @@ import os
 
 import matplotlib.pyplot as plt
 
+from . import utils
+
 
 def parse(parser):
     """Parse command-line arguments for the runtime module."""
@@ -21,12 +23,7 @@ def parse(parser):
         help="Path to the folder where plots will be saved (default: plots)",
     )
 
-    parser.add_argument(
-        "--log-level",
-        default="INFO",
-        choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
-        help="Set the logging level (default: INFO)",
-    )
+    utils.add_log_level_argument(parser)
 
     return parser
 
@@ -191,6 +188,7 @@ def main(args):
     benchmarks_list = _collect_benchmarks(results)
     benchmark_metrics = _determine_metrics(benchmarks_list, results)
     raw_values = _collect_raw_values(benchmarks_list, benchmark_metrics, results)
+
     runtime_data = _normalize_values(benchmarks_list, benchmark_metrics, raw_values)
     _plot_results(
         runtime_data,

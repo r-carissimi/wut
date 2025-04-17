@@ -11,7 +11,7 @@ import os
 import re
 import time
 
-from . import benchmarks, runtime
+from . import benchmarks, runtime, utils
 
 
 def parse(parser):
@@ -64,12 +64,7 @@ def parse(parser):
         help="Path to the folder where results will be saved (default: results)",
     )
 
-    parser.add_argument(
-        "--log-level",
-        default="INFO",
-        choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
-        help="Set the logging level (default: INFO)",
-    )
+    utils.add_log_level_argument(parser)
 
     return parser
 
