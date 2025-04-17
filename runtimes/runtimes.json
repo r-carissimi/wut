@@ -1,5 +1,5 @@
 {
-"runtimes": [
+    "runtimes": [
         {
             "name": "wasmtime",
             "command": "/opt/homebrew/bin/wasmtime",
@@ -9,6 +9,12 @@
             "name": "wasmer",
             "command": "/opt/homebrew/bin/wasmer",
             "desc": "Wasmer is a standalone WebAssembly runtime that can run WebAssembly binaries"
+        },
+        {
+            "name": "wasmtimer",
+            "command": "wasmtime/bin/wasmtime",
+            "version-command": "wasmtime/bin/wasmtime -V",
+            "desc": "Wasmtime is a standalone JIT-style runtime for WebAssembly"
         }
     ]
 }

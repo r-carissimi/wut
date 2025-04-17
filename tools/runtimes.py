@@ -45,7 +45,36 @@ def parse(parser):
         help="Path to the folder containing installers (default: installers)",
     )
 
-    # TODO: add "install" command to install a runtime
+    # "install" command to install a runtime
+    install_parser = subparsers.add_parser(
+        "install",
+        help=_install_runtime.__doc__.split("\n")[0],
+        description=_install_runtime.__doc__.split("\n")[0],
+    )
+
+    install_parser.add_argument(
+        "name",
+        help="Name of the runtime to install",
+        type=str,
+    )
+
+    install_parser.add_argument(
+        "--installers-folder",
+        default="installers",
+        help="Path to the folder containing installers (default: installers)",
+    )
+
+    install_parser.add_argument(
+        "--runtimes-file",
+        default="runtimes/runtimes.json",
+        help="Path to the JSON file containing runtimes (default: runtimes/runtimes.json)",
+    )
+
+    install_parser.add_argument(
+        "--runtimes-folder",
+        default="runtimes",
+        help="Path to the folder containing runtimes (default: runtimes)",
+    )
 
     # TODO: add "remove" command to remove a runtime
 
@@ -110,6 +139,8 @@ def get_runtime_from_name(name, file="runtimes/runtimes.json"):
 
     Args:
         name (str): Name of the runtime.
+        file (str): Path to the JSON file containing runtimes. File must
+                    exist but can be empty.
 
     Returns:
         dict: Dictionary containing runtime information. Returns None if
@@ -130,6 +161,7 @@ def get_runtime_from_name(name, file="runtimes/runtimes.json"):
     return None
 
 
+# TODO: fix, not working if not in the wut directory
 def _list_available_runtimes(installers_folder="installers"):
     """List available runtimes.
 
@@ -173,6 +205,70 @@ def _list_available_runtimes(installers_folder="installers"):
     return runtimes
 
 
+def _get_available_runtime_by_name(name, runtimes_list):
+    """Get runtime information by name.
+
+    Args:
+        name (str): Name of the runtime.
+        runtimes_list (list): List of runtimes.
+
+    Returns:
+        dict: Dictionary containing runtime information. Returns None if
+              the runtime is not found.
+    """
+
+    for runtime in runtimes_list:
+        if runtime["name"] == name:
+            return runtime
+    logging.warning(f"Runtime {name} not found.")
+    return None
+
+
+def _add_runtime_to_runtimes_file(runtime, file="runtimes/runtimes.json"):
+    """Add a runtime to the runtimes.json file.
+    It expects that the runtime does not exists in the file.
+    """
+
+    try:
+        runtimes_list = _list_runtimes(file)
+
+        if "install-command" in runtime:
+            del runtime["install-command"]
+
+        runtimes_list.append(runtime)
+
+        with open(file, "w") as f:
+            json.dump({"runtimes": runtimes_list}, f, indent=4)
+
+        logging.info(f"Added {runtime['name']} to {file}.")
+    except Exception as e:
+        logging.error(f"Failed to add runtime to {file}: {e}")
+
+
+def _install_runtime(
+    runtime, runtimes_folder="runtimes", runtimes_file="runtimes.json"
+):
+    """
+    Installs a runtime.
+    """
+    logging.info(f"Installing {runtime['name']}...")
+
+    process = os.popen(runtime["install-command"])
+    output = process.read()
+
+    logging.info(f"{output}")
+
+    # Add the runtime to the runtimes.json file if the installation was successful
+    if process.close() is None:
+        logging.info(f"{runtime['name']} installed successfully.")
+        _add_runtime_to_runtimes_file(runtime, runtimes_file)
+    else:
+        logging.error(f"Failed to install {runtime['name']}.")
+        return
+
+    # TODO: make runtimes_folder actually do something
+
+
 def main(args):
     logging.getLogger().setLevel(getattr(logging, args.log_level.upper()))
     if args.operation == "list":
@@ -194,6 +290,26 @@ def main(args):
         print("Available runtimes:")
         for runtime in available_runtimes:
             print(f" * {runtime['name']}: {runtime['desc']}")
+
+    elif args.operation == "install":
+        available_runtimes = _list_available_runtimes(args.installers_folder)
+        runtime = _get_available_runtime_by_name(args.name, available_runtimes)
+        if not runtime:
+            print(f"Runtime {args.name} not found.")
+            return
+
+        # Check if the runtime is already installed
+        installed_runtimes = _list_runtimes(args.runtimes_file)
+        if any(rt["name"] == runtime["name"] for rt in installed_runtimes):
+            print(f"Runtime {args.name} is already installed.")
+            return
+
+        # Install the runtime
+        _install_runtime(runtime, args.runtimes_folder, args.runtimes_file)
+
+    elif args.operation == "remove":
+        # TODO: implement remove
+        print("Remove operation not implemented yet.")
 
     else:
         print("Unknown operation. Use 'list' to see available runtimes.")

@@ -70,16 +70,16 @@ def parse(parser):
 
 
 def _get_runtimes_from_names(runtimes_list, file="runtimes/runtimes.json"):
-    runtimes = []
+    runtimes_ = []
     for runtime_name in runtimes_list:
         if runtime_name == "all":
             continue
 
         r = runtimes.get_runtime_from_name(runtime_name, file)
         if r is not None:
-            runtimes.append(r)
+            runtimes_.append(r)
 
-    return runtimes
+    return runtimes_
 
 
 def _get_benchmarks_from_names(benchmarks_list):
