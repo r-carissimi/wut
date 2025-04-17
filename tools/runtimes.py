@@ -504,7 +504,7 @@ def main(args):
                 runtime["version-command"], args.runtimes_folder
             )
             if version:
-                print(f" * {runtime['name']}: {version}")
+                print(f" * {runtime['name']}: {version.splitlines()[0]}")
             else:
                 logging.warning(f"Failed to get version for {runtime['name']}.")
 
