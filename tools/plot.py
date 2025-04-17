@@ -1,6 +1,5 @@
 """Plots results of the benchmarks"""
 
-import json
 import logging
 import os
 
@@ -26,86 +25,6 @@ def parse(parser):
     utils.add_log_level_argument(parser)
 
     return parser
-
-
-def _load_results(file_path):
-    """Load benchmark results from a JSON file."""
-    try:
-        with open(file_path, "r") as f:
-            results = json.load(f)
-            if not results:
-                logging.info("No results found in the file.")
-                return None
-            return results
-    except json.JSONDecodeError:
-        logging.error("Failed to decode JSON from the results file.")
-        return None
-
-
-def _collect_benchmarks(results):
-    """Collect and sort benchmark names."""
-    benchmarks_set = set()
-    for runtime in results.values():
-        benchmarks_set.update(runtime.keys())
-    return sorted(benchmarks_set)
-
-
-def _determine_metrics(benchmarks_list, results):
-    """Determine the metric to use for each benchmark.
-
-    If any runtime has a score > 0, use score; otherwise, use elapsed_time.
-    """
-
-    benchmark_metrics = {}
-    for benchmark in benchmarks_list:
-        use_score = any(
-            results[runtime].get(benchmark, {}).get("score", 0) > 0
-            for runtime in results
-        )
-        benchmark_metrics[benchmark] = "score" if use_score else "elapsed_time"
-
-    logging.debug(f"Benchmark metrics: {benchmark_metrics}")
-
-    return benchmark_metrics
-
-
-def _collect_raw_values(benchmarks_list, benchmark_metrics, results):
-    """Collects values for each benchmark and runtime.
-
-    What it does it taking the values from the results file in the following format:
-
-    {
-        "runtime1": {
-            "benchmark1": {"elapsed_time": 1111, "score": 0},
-            "benchmark2": {"elapsed_time": 2222, "score": 90},
-        },
-        "runtime2": {
-            "benchmark1": {"elapsed_time": 3333, "score": 0},
-            "benchmark2": {"elapsed_time": 4444, "score": 180},
-        }
-    }
-    And collecting the values for each benchmark and runtime in a dictionary.
-    The result will be a dictionary with the following format:
-
-    {
-        "benchmark1": {"runtime1": 1000, "runtime2": 3333},
-        "benchmark2": {"runtime1": 90, "runtime2": 180}
-    }
-    """
-
-    raw_values = {
-        benchmark: {
-            runtime: (data.get(metric, 0))
-            for runtime, data in (
-                (runtime, results[runtime].get(benchmark, {})) for runtime in results
-            )
-        }
-        for benchmark, metric in ((b, benchmark_metrics[b]) for b in benchmarks_list)
-    }
-
-    logging.debug(f"Raw values collected: {raw_values}")
-
-    return raw_values
 
 
 def _normalize_values(benchmarks_list, benchmark_metrics, raw_values):
@@ -181,13 +100,15 @@ def main(args):
     logging.getLogger().setLevel(getattr(logging, args.log_level.upper()))
     os.makedirs(args.plots_folder, exist_ok=True)
 
-    results = _load_results(args.results_file)
+    results = utils.load_results_file(args.results_file)
     if not results:
         return
 
-    benchmarks_list = _collect_benchmarks(results)
-    benchmark_metrics = _determine_metrics(benchmarks_list, results)
-    raw_values = _collect_raw_values(benchmarks_list, benchmark_metrics, results)
+    benchmarks_list = utils.collect_benchmarks(results)
+    benchmark_metrics = utils.determine_benchmark_metrics(results, benchmarks_list)
+    raw_values = utils.transpose_benchmark_data(
+        results, benchmarks_list, benchmark_metrics
+    )
 
     runtime_data = _normalize_values(benchmarks_list, benchmark_metrics, raw_values)
     _plot_results(

@@ -4,7 +4,7 @@ import csv
 import logging
 import os
 
-from . import plot, utils
+from . import utils
 
 
 def parse(parser):
@@ -77,17 +77,15 @@ def main(args):
     logging.getLogger().setLevel(getattr(logging, args.log_level.upper()))
     os.makedirs(args.csv_folder, exist_ok=True)
 
-    # TODO: needs refactoring
-
-    results = plot._load_results(args.results_file)
+    results = utils.load_results_file(args.results_file)
     if not results:
         return
 
-    benchmarks_list = plot._collect_benchmarks(results)
-    benchmark_metrics = plot._determine_metrics(benchmarks_list, results)
-    raw_values = plot._collect_raw_values(benchmarks_list, benchmark_metrics, results)
-
-    logging.debug(f"{benchmark_metrics}")
+    benchmarks_list = utils.collect_benchmarks(results)
+    benchmark_metrics = utils.determine_benchmark_metrics(results, benchmarks_list)
+    raw_values = utils.transpose_benchmark_data(
+        results, benchmarks_list, benchmark_metrics
+    )
 
     # CSV filename is the same as the results file, but with a .csv extension
     filename = os.path.join(
