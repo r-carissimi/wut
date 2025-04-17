@@ -4,5 +4,6 @@
 	"version-command": "wasmer/bin/wasmer --version",
 	"install-command": "curl https://get.wasmer.io -sSfL | HOME=$(mktemp -d) WASMER_DIR='wasmer' sh",
 	"desc": "A standalone WebAssembly runtime for running WebAssembly outside of the browser.",
-	"install-dir": "wasmer"
+	"install-dir": "wasmer",
+	"update-command": "wasmer/bin/wasmer self-update"
 }

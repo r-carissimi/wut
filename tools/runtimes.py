@@ -121,6 +121,31 @@ def parse(parser):
         help="Path to the folder containing runtimes (default: runtimes)",
     )
 
+    # "update" command to update the runtimes
+    update_parser = subparsers.add_parser(
+        "update",
+        help=_update_runtime.__doc__.split("\n")[0],
+        description=_update_runtime.__doc__.split("\n")[0],
+    )
+
+    update_parser.add_argument(
+        "name",
+        help="Name of the runtime to update",
+        type=str,
+    )
+
+    update_parser.add_argument(
+        "--runtimes-folder",
+        default="runtimes",
+        help="Path to the folder containing runtimes (default: runtimes)",
+    )
+
+    update_parser.add_argument(
+        "--runtimes-file",
+        default="runtimes/runtimes.json",
+        help="Path to the JSON file containing runtimes (default: runtimes/runtimes.json)",
+    )
+
     for subparser in subparsers.choices.values():
         utils.add_log_level_argument(subparser)
 
@@ -199,7 +224,6 @@ def get_runtime_from_name(name, file="runtimes/runtimes.json"):
     return None
 
 
-# TODO: fix, not working if not in the wut directory
 def _list_available_runtimes(installers_folder="installers"):
     """List available runtimes.
 
@@ -310,6 +334,32 @@ def _install_runtime(
         _add_runtime_to_runtimes_file(runtime, runtimes_file)
     else:
         logging.error(f"Failed to install {runtime['name']}.")
+        return
+
+
+def _update_runtime(runtime, runtimes_folder="runtimes"):
+    """Update a runtime."""
+
+    logging.info(f"Installing {runtime['name']}...")
+
+    process = os.popen(f"cd {runtimes_folder} &&" + runtime["update-command"])
+    output = process.read()
+
+    logging.info(f"{output}")
+
+    # Add the runtime to the runtimes.json file if the installation was successful
+    if process.close() is None:
+        # Check that the runtime actually works
+        version = _get_runtime_version(runtime["version-command"], runtimes_folder)
+        if version is None:
+            logging.error(
+                f"Failed to get version for {runtime['name']}. Probably not updated correctly."
+            )
+            return
+
+        logging.info(f"{runtime['name']} updated successfully.")
+    else:
+        logging.error(f"Failed to update {runtime['name']}.")
         return
 
 
@@ -457,6 +507,22 @@ def main(args):
                 print(f" * {runtime['name']}: {version}")
             else:
                 logging.warning(f"Failed to get version for {runtime['name']}.")
+
+    elif args.operation == "update":
+        args.runtimes_folder = utils.get_absolute_path(args.runtimes_folder)
+        args.runtimes_file = utils.get_absolute_path(args.runtimes_file)
+
+        # Check if the runtime is installed
+        installed_runtimes = list_runtimes(args.runtimes_file)
+        if not any(rt["name"] == args.name for rt in installed_runtimes):
+            print(f"Runtime {args.name} is not installed.")
+            return
+
+        # Get the runtime information
+        runtime = get_runtime_from_name(args.name, args.runtimes_file)
+
+        # Update the runtime
+        _update_runtime(runtime, args.runtimes_folder, args.runtimes_file)
 
     else:
         print("Unknown operation. Use 'list' to see available runtimes.")
