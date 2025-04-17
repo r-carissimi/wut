@@ -23,8 +23,8 @@ def parse(parser):
     # "list" command to list installed runtimes
     list_parser = subparsers.add_parser(
         "list",
-        help=_list_runtimes.__doc__.split("\n")[0],
-        description=_list_runtimes.__doc__.split("\n")[0],
+        help=list_runtimes.__doc__.split("\n")[0],
+        description=list_runtimes.__doc__.split("\n")[0],
     )
 
     list_parser.add_argument(
@@ -127,7 +127,7 @@ def parse(parser):
     return parser
 
 
-def _list_runtimes(file="runtimes/runtimes.json"):
+def list_runtimes(file="runtimes/runtimes.json"):
     """List installed runtimes.
 
     Args:
@@ -196,7 +196,7 @@ def get_runtime_from_name(name, file="runtimes/runtimes.json"):
                 }
     """
 
-    runtimes_list = _list_runtimes(file)
+    runtimes_list = list_runtimes(file)
     for runtime in runtimes_list:
         if runtime["name"] == name:
             return runtime
@@ -273,7 +273,7 @@ def _add_runtime_to_runtimes_file(runtime, file="runtimes/runtimes.json"):
     """
 
     try:
-        runtimes_list = _list_runtimes(file)
+        runtimes_list = list_runtimes(file)
 
         if "install-command" in runtime:
             del runtime["install-command"]
@@ -316,7 +316,7 @@ def _remove_runtime_from_runtimes_file(name, file="runtimes/runtimes.json"):
     """Remove a runtime from the runtimes.json file."""
 
     try:
-        runtimes_list = _list_runtimes(file)
+        runtimes_list = list_runtimes(file)
         runtimes_list = [
             runtime for runtime in runtimes_list if runtime["name"] != name
         ]
@@ -371,7 +371,7 @@ def _get_runtime_version(command, runtimes_folder="runtimes"):
 def main(args):
     logging.getLogger().setLevel(getattr(logging, args.log_level.upper()))
     if args.operation == "list":
-        runtimes_list = _list_runtimes(args.runtimes_file)
+        runtimes_list = list_runtimes(args.runtimes_file)
         if not runtimes_list:
             print("No runtimes found.")
             return
@@ -398,7 +398,7 @@ def main(args):
             return
 
         # Check if the runtime is already installed
-        installed_runtimes = _list_runtimes(args.runtimes_file)
+        installed_runtimes = list_runtimes(args.runtimes_file)
         if any(rt["name"] == runtime["name"] for rt in installed_runtimes):
             print(f"Runtime {args.name} is already installed.")
             return
@@ -408,7 +408,7 @@ def main(args):
 
     elif args.operation == "remove":
         # Check if the runtime is installed
-        installed_runtimes = _list_runtimes(args.runtimes_file)
+        installed_runtimes = list_runtimes(args.runtimes_file)
         if not any(rt["name"] == args.name for rt in installed_runtimes):
             print(f"Runtime {args.name} is not installed.")
             return
@@ -420,7 +420,7 @@ def main(args):
         _remove_runtime(args.name, args.runtimes_folder, args.runtimes_file)
 
     elif args.operation == "version":
-        runtimes_list = _list_runtimes(args.runtimes_file)
+        runtimes_list = list_runtimes(args.runtimes_file)
         if not runtimes_list:
             print("No runtimes found.")
             return

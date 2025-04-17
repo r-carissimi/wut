@@ -11,6 +11,12 @@
             "command": "wasmtime/bin/wasmtime",
             "version-command": "wasmtime/bin/wasmtime -V",
             "desc": "Wasmtime is a standalone JIT-style runtime for WebAssembly"
+        },
+        {
+            "name": "wasmedge",
+            "command": "wasmedge/bin/wasmedge",
+            "version-command": "wasmedge/bin/wasmedge --version",
+            "desc": "A CNCF extensible WebAssembly runtime."
         }
     ]
 }
