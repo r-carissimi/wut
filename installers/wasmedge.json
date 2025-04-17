@@ -3,5 +3,6 @@
 	"command": "wasmedge/bin/wasmedge",
 	"version-command": "wasmedge/bin/wasmedge --version",
 	"install-command": "curl -sSf https://raw.githubusercontent.com/WasmEdge/WasmEdge/master/utils/install.sh | bash -s -- -p wasmedge",
-	"desc": "A CNCF extensible WebAssembly runtime."
+	"desc": "A CNCF extensible WebAssembly runtime.",
+	"install-dir": "wasmedge"
 }

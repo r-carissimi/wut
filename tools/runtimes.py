@@ -322,13 +322,15 @@ def _remove_runtime_from_runtimes_file(name, file="runtimes/runtimes.json"):
         logging.error(f"Failed to remove runtime from {file}: {e}")
 
 
-def _remove_runtime(name, runtimes_folder="runtimes", runtimes_file="runtimes.json"):
+def _remove_runtime(
+    name, install_dir, runtimes_folder="runtimes", runtimes_file="runtimes.json"
+):
     """Remove a runtime."""
 
     logging.debug(f"Removing {name}...")
 
     # Delete the corresponding folder
-    runtime_folder = os.path.join(runtimes_folder, name)
+    runtime_folder = os.path.join(runtimes_folder, install_dir)
     if os.path.exists(runtime_folder):
         shutil.rmtree(runtime_folder)
         logging.debug(f"Removed {runtime_folder}.")
@@ -422,7 +424,9 @@ def main(args):
         runtime = get_runtime_from_name(args.name, args.runtimes_file)
 
         # Remove the runtime
-        _remove_runtime(args.name, args.runtimes_folder, args.runtimes_file)
+        _remove_runtime(
+            args.name, runtime["install-dir"], args.runtimes_folder, args.runtimes_file
+        )
 
         print(f"Runtime {args.name} removed successfully.")
 
