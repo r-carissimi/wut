@@ -1,9 +1,10 @@
 """Exports results to a CSV file."""
 
+import csv
 import logging
 import os
 
-from . import utils
+from . import plot, utils
 
 
 def parse(parser):
@@ -25,11 +26,73 @@ def parse(parser):
     return parser
 
 
+def _write_benchmark_results_to_csv(data, metrics, filename):
+    """
+    Writes benchmark results from a nested dictionary to a CSV file.
+    Benchmarks can have different sets of runtimes.
+
+    The input dict format is:
+    {
+        "benchmark_name": {
+            "runtime1": value1,
+            "runtime2": value2,
+            ...
+        },
+        ...
+    }
+
+    The output CSV will have headers: "benchmark", "wasmtime", "wasmer", ...
+
+    Args:
+        data (dict): Nested dictionary containing benchmark results.
+                     The outer keys are benchmark names, and the inner
+                     keys are runtime names.
+        filename (str): The name of the CSV file to write to.
+    """
+
+    # Collecting all unique runtimes in order to create the header
+    all_runtimes = set()
+    for runtimes in data.values():
+        all_runtimes.update(runtimes.keys())
+
+    # Sorting runtimes for consistent order in the CSV
+    all_runtimes = sorted(all_runtimes)
+
+    logging.debug(f"Runtimes found in results: {all_runtimes}")
+
+    # Writing to CSV (header first and then rows)
+    with open(filename, mode="w", newline="") as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow(["benchmark"] + all_runtimes)
+        for benchmark, runtimes in data.items():
+            row = [benchmark + " (" + metrics[benchmark] + ")"] + [
+                runtimes.get(rt, "") for rt in all_runtimes
+            ]
+            writer.writerow(row)
+
+    logging.info(f"Results exported to {filename}")
+
+
 def main(args):
     logging.getLogger().setLevel(getattr(logging, args.log_level.upper()))
     os.makedirs(args.csv_folder, exist_ok=True)
 
+    # TODO: needs refactoring
 
-# TODO: make the actual export. Probably can reuse most of the
-# code from the plot module. Think about how to do it.
-# Maybe create a "utils" module.
+    results = plot._load_results(args.results_file)
+    if not results:
+        return
+
+    benchmarks_list = plot._collect_benchmarks(results)
+    benchmark_metrics = plot._determine_metrics(benchmarks_list, results)
+    raw_values = plot._collect_raw_values(benchmarks_list, benchmark_metrics, results)
+
+    logging.debug(f"{benchmark_metrics}")
+
+    # CSV filename is the same as the results file, but with a .csv extension
+    filename = os.path.join(
+        args.csv_folder,
+        os.path.splitext(os.path.basename(args.results_file))[0] + ".csv",
+    )
+
+    _write_benchmark_results_to_csv(raw_values, benchmark_metrics, filename)

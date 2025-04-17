@@ -1,5 +1,6 @@
 def add_log_level_argument(parser):
     """Add a --log-level argument to the parser."""
+
     parser.add_argument(
         "--log-level",
         default="INFO",
