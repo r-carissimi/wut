@@ -1,6 +1,8 @@
 **/.DS_Store
 results/
 plots/
+runtimes/*
+!runtimes/runtimes.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

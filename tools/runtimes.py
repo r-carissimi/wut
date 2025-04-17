@@ -18,10 +18,12 @@ def parse(parser):
     """
 
     subparsers = parser.add_subparsers(dest="operation", required=True)
+
+    # "list" command to list installed runtimes
     list_parser = subparsers.add_parser(
         "list",
-        help=list_runtimes.__doc__.split("\n")[0],
-        description=list_runtimes.__doc__.split("\n")[0],
+        help=_list_runtimes.__doc__.split("\n")[0],
+        description=_list_runtimes.__doc__.split("\n")[0],
     )
 
     list_parser.add_argument(
@@ -30,14 +32,31 @@ def parse(parser):
         help="Path to the JSON file containing runtimes (default: runtimes/runtimes.json)",
     )
 
+    # "available" command to list available runtimes
+    available_parser = subparsers.add_parser(
+        "available",
+        help=_list_available_runtimes.__doc__.split("\n")[0],
+        description=_list_available_runtimes.__doc__.split("\n")[0],
+    )
+
+    available_parser.add_argument(
+        "--installers-folder",
+        default="installers",
+        help="Path to the folder containing installers (default: installers)",
+    )
+
+    # TODO: add "install" command to install a runtime
+
+    # TODO: add "remove" command to remove a runtime
+
     for subparser in subparsers.choices.values():
         utils.add_log_level_argument(subparser)
 
     return parser
 
 
-def list_runtimes(file="runtimes/runtimes.json"):
-    """List available runtimes.
+def _list_runtimes(file="runtimes/runtimes.json"):
+    """List installed runtimes.
 
     Args:
         file (str): Path to the JSON file containing runtimes. File must
@@ -46,7 +65,7 @@ def list_runtimes(file="runtimes/runtimes.json"):
                     is reserved for selecting all the runtimes.
 
     Returns:
-        list: List of available runtimes, defined as a list of dictionaries
+        list: List of installed runtimes, defined as a list of dictionaries
               containing runtime information. List is empty if no runtimes
               are found.
 
@@ -103,7 +122,7 @@ def get_runtime_from_name(name, file="runtimes/runtimes.json"):
                 }
     """
 
-    runtimes_list = list_runtimes(file)
+    runtimes_list = _list_runtimes(file)
     for runtime in runtimes_list:
         if runtime["name"] == name:
             return runtime
@@ -111,10 +130,16 @@ def get_runtime_from_name(name, file="runtimes/runtimes.json"):
     return None
 
 
+def _list_available_runtimes(installers_folder="installers"):
+    """List available runtimes."""
+
+    print("Feature not implemented")
+
+
 def main(args):
     logging.getLogger().setLevel(getattr(logging, args.log_level.upper()))
     if args.operation == "list":
-        runtimes_list = list_runtimes(args.runtimes_file)
+        runtimes_list = _list_runtimes(args.runtimes_file)
         if not runtimes_list:
             print("No runtimes found.")
             return
@@ -123,6 +148,9 @@ def main(args):
         for runtime in runtimes_list:
             logging.debug(f"Found runtime: {runtime}")
             print(f" * {runtime['name']}: {runtime['desc']}")
+
+    elif args.operation == "available":
+        _list_available_runtimes(args.installers_folder)
 
     else:
         print("Unknown operation. Use 'list' to see available runtimes.")

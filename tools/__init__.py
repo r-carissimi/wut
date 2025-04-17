@@ -1,9 +1,9 @@
-from . import benchmarks, export, plot, run, runtime
+from . import benchmarks, export, plot, run, runtimes
 
 commands: dict = {
     "benchmarks": benchmarks,
     "run": run,
-    "runtime": runtime,
+    "runtimes": runtimes,
     "plot": plot,
     "export": export,
 }

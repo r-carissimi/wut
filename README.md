@@ -36,7 +36,7 @@ python3 wut.py benchmarks list
 * List available runtimes
 
 ```bash
-python3 wut.py runtime list
+python3 wut.py runtimes list
 ```
 
 * Run benchmarks

@@ -11,7 +11,7 @@ import os
 import re
 import time
 
-from . import benchmarks, runtime, utils
+from . import benchmarks, runtimes, utils
 
 
 def parse(parser):
@@ -75,7 +75,7 @@ def _get_runtimes_from_names(runtimes_list, file="runtimes/runtimes.json"):
         if runtime_name == "all":
             continue
 
-        r = runtime.get_runtime_from_name(runtime_name, file)
+        r = runtimes.get_runtime_from_name(runtime_name, file)
         if r is not None:
             runtimes.append(r)
 
@@ -210,7 +210,7 @@ def main(args):
     # Get the runtime objects from the command line arguments
     runtimes_list = args.runtimes
     if runtimes_list == ["all"]:
-        runtimes_list = runtime.list_runtimes(file=args.runtimes_file)
+        runtimes_list = runtimes.list_runtimes(file=args.runtimes_file)
     else:
         runtimes_list = _get_runtimes_from_names(runtimes_list, file=args.runtimes_file)
 
