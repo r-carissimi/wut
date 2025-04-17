@@ -3,7 +3,7 @@ from argparse import ArgumentParser
 
 from tools import commands, utils
 
-VERSION = "0.2α (2025-04-15)"
+VERSION = "0.3α (2025-04-17)"
 
 
 def setup_subparsers(parser, commands):
@@ -30,7 +30,7 @@ def setup_logging(level=logging.WARNING):
 
 def main():
     parser = ArgumentParser(description="WUT - WUT Understands Timing")
-    parser.add_argument("--version", action="version", version=f"WAT {VERSION}")
+    parser.add_argument("--version", action="version", version=f"WUT {VERSION}")
     utils.add_log_level_argument(parser)
     setup_subparsers(parser, commands)
 

@@ -1,4 +1,4 @@
-"""Exports results to a CSV file."""
+"""Exports results to a CSV file"""
 
 import csv
 import logging
