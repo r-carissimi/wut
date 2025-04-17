@@ -298,6 +298,14 @@ def _install_runtime(
 
     # Add the runtime to the runtimes.json file if the installation was successful
     if process.close() is None:
+        # Check that the runtime actually works
+        version = _get_runtime_version(runtime["version-command"], runtimes_folder)
+        if version is None:
+            logging.error(
+                f"Failed to get version for {runtime['name']}. Probably not installed correctly."
+            )
+            return
+
         logging.info(f"{runtime['name']} installed successfully.")
         _add_runtime_to_runtimes_file(runtime, runtimes_file)
     else:
