@@ -154,16 +154,11 @@ def list_runtimes(file="runtimes/runtimes.json"):
                         "command": "/usr/bin/wasmer",
                     }
                 ]
-
-    Raises:
-        FileNotFoundError: If the specified file does not exist.
-        json.JSONDecodeError: If the JSON file is malformed.
-        KeyError: If the JSON file does not contain the expected structure.
     """
 
     if not os.path.exists(file):
-        logging.error(f"{file} file not found.")
-        raise FileNotFoundError(f"{file} file not found.")
+        logging.warning(f"{file} file not found.")
+        return list()
     if os.path.getsize(file) == 0:
         logging.warning(f"{file} is empty.")
         return list()
@@ -291,9 +286,8 @@ def _add_runtime_to_runtimes_file(runtime, file="runtimes/runtimes.json"):
 def _install_runtime(
     runtime, runtimes_folder="runtimes", runtimes_file="runtimes.json"
 ):
-    """
-    Installs a runtime.
-    """
+    """Installs a runtime."""
+
     logging.info(f"Installing {runtime['name']}...")
 
     process = os.popen(runtime["install-command"])
