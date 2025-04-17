@@ -100,6 +100,9 @@ def main(args):
     logging.getLogger().setLevel(getattr(logging, args.log_level.upper()))
     os.makedirs(args.plots_folder, exist_ok=True)
 
+    args.results_file = utils.get_absolute_path(args.results_file)
+    args.plots_folder = utils.get_absolute_path(args.plots_folder)
+
     results = utils.load_results_file(args.results_file)
     if not results:
         return

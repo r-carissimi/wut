@@ -209,6 +209,7 @@ def _list_available_runtimes(installers_folder="installers"):
     Returns:
         list[dict]: List of available runtimes, each represented as a dictionary.
     """
+
     if not os.path.exists(installers_folder):
         logging.error(f"{installers_folder} folder not found.")
         return []
@@ -290,7 +291,7 @@ def _install_runtime(
 
     logging.info(f"Installing {runtime['name']}...")
 
-    process = os.popen(runtime["install-command"])
+    process = os.popen(f"cd {runtimes_folder} &&" + runtime["install-command"])
     output = process.read()
 
     logging.info(f"{output}")
@@ -302,8 +303,6 @@ def _install_runtime(
     else:
         logging.error(f"Failed to install {runtime['name']}.")
         return
-
-    # TODO: make runtimes_folder actually do something
 
 
 def _remove_runtime_from_runtimes_file(name, file="runtimes/runtimes.json"):
@@ -332,7 +331,7 @@ def _remove_runtime(name, runtimes_folder="runtimes", runtimes_file="runtimes.js
     runtime_folder = os.path.join(runtimes_folder, name)
     if os.path.exists(runtime_folder):
         shutil.rmtree(runtime_folder)
-        logging.info(f"Removed {runtime_folder}.")
+        logging.debug(f"Removed {runtime_folder}.")
     else:
         logging.warning(f"{runtime_folder} does not exist.")
 
@@ -364,7 +363,10 @@ def _get_runtime_version(command, runtimes_folder="runtimes"):
 
 def main(args):
     logging.getLogger().setLevel(getattr(logging, args.log_level.upper()))
+
     if args.operation == "list":
+        args.runtimes_file = utils.get_absolute_path(args.runtimes_file)
+
         runtimes_list = list_runtimes(args.runtimes_file)
         if not runtimes_list:
             print("No runtimes found.")
@@ -376,6 +378,8 @@ def main(args):
             print(f" * {runtime['name']}: {runtime['desc']}")
 
     elif args.operation == "available":
+        args.installers_folder = utils.get_absolute_path(args.installers_folder)
+
         available_runtimes = _list_available_runtimes(args.installers_folder)
         if not available_runtimes:
             print("No runtimes found.")
@@ -385,6 +389,10 @@ def main(args):
             print(f" * {runtime['name']}: {runtime['desc']}")
 
     elif args.operation == "install":
+        args.installers_folder = utils.get_absolute_path(args.installers_folder)
+        args.runtimes_folder = utils.get_absolute_path(args.runtimes_folder)
+        args.runtimes_file = utils.get_absolute_path(args.runtimes_file)
+
         available_runtimes = _list_available_runtimes(args.installers_folder)
         runtime = _get_available_runtime_by_name(args.name, available_runtimes)
         if not runtime:
@@ -401,6 +409,9 @@ def main(args):
         _install_runtime(runtime, args.runtimes_folder, args.runtimes_file)
 
     elif args.operation == "remove":
+        args.runtimes_folder = utils.get_absolute_path(args.runtimes_folder)
+        args.runtimes_file = utils.get_absolute_path(args.runtimes_file)
+
         # Check if the runtime is installed
         installed_runtimes = list_runtimes(args.runtimes_file)
         if not any(rt["name"] == args.name for rt in installed_runtimes):
@@ -413,7 +424,12 @@ def main(args):
         # Remove the runtime
         _remove_runtime(args.name, args.runtimes_folder, args.runtimes_file)
 
+        print(f"Runtime {args.name} removed successfully.")
+
     elif args.operation == "version":
+        args.runtimes_folder = utils.get_absolute_path(args.runtimes_folder)
+        args.runtimes_file = utils.get_absolute_path(args.runtimes_file)
+
         runtimes_list = list_runtimes(args.runtimes_file)
         if not runtimes_list:
             print("No runtimes found.")

@@ -82,14 +82,14 @@ def _get_runtimes_from_names(runtimes_list, file="runtimes/runtimes.json"):
     return runtimes_
 
 
-def _get_benchmarks_from_names(benchmarks_list):
+def _get_benchmarks_from_names(benchmarks_list, benchmarks_folder="benchmarks"):
     benchs = dict()
 
     for benchmark_name in benchmarks_list:
         if benchmark_name == "all":
             continue
 
-        b = benchmarks.get_benchmark_from_name(benchmark_name)
+        b = benchmarks.get_benchmark_from_name(benchmark_name, benchmarks_folder)
         if b is not None:
             for k, v in b.items():
                 benchs.setdefault(k, []).extend(v)
@@ -159,6 +159,8 @@ def _run_benchmark_with_runtime(benchmark, runtime, benchmarks_folder):
     Args:
         benchmark (dict): The benchmark to run.
         runtime (dict): The runtime to use.
+        benchmarks_folder (str): The folder containing the benchmarks. Can
+                                 be relative or absolute.
 
     Returns:
         tuple: A tuple containing
@@ -168,8 +170,9 @@ def _run_benchmark_with_runtime(benchmark, runtime, benchmarks_folder):
                * output: The output of the benchmark as a string
     """
 
+    benchmarks_folder = utils.get_absolute_path(benchmarks_folder)
+
     benchmark_path = os.path.join(
-        os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
         benchmarks_folder,
         benchmark["path"],
     )
@@ -207,6 +210,10 @@ def _save_results_to_file(results, folder="results"):
 def main(args):
     logging.getLogger().setLevel(getattr(logging, args.log_level.upper()))
 
+    args.benchmarks_folder = utils.get_absolute_path(args.benchmarks_folder)
+    args.runtimes_file = utils.get_absolute_path(args.runtimes_file)
+    args.results_folder = utils.get_absolute_path(args.results_folder)
+
     # Get the runtime objects from the command line arguments
     runtimes_list = args.runtimes
     if runtimes_list == ["all"]:
@@ -227,9 +234,11 @@ def main(args):
     # Get the benchmark objects from the command line arguments
     benchmarks_list = args.benchmarks
     if benchmarks_list == ["all"]:
-        benchmarks_list = benchmarks.list_benchmarks()
+        benchmarks_list = benchmarks.list_benchmarks(args.benchmarks_folder)
     else:
-        benchmarks_list = _get_benchmarks_from_names(benchmarks_list)
+        benchmarks_list = _get_benchmarks_from_names(
+            benchmarks_list, args.benchmarks_folder
+        )
 
     logging.debug(f"Using benchmarks: {benchmarks_list}")
 

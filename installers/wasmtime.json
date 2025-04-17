@@ -2,6 +2,6 @@
 	"name": "wasmtime",
 	"command": "wasmtime/bin/wasmtime",
 	"version-command": "wasmtime/bin/wasmtime -V",
-	"install-command": "curl https://wasmtime.dev/install.sh -sSf | HOME=$(mktemp -d) WASMTIME_HOME='runtimes/wasmtime' bash",
+	"install-command": "curl https://wasmtime.dev/install.sh -sSf | HOME=$(mktemp -d) WASMTIME_HOME='wasmtime' bash",
 	"desc": "Wasmtime is a standalone JIT-style runtime for WebAssembly"
 }

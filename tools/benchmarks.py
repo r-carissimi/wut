@@ -190,7 +190,7 @@ def list_benchmarks(folder="benchmarks"):
     return benchmarks
 
 
-def get_benchmark_from_name(name):
+def get_benchmark_from_name(name, folder="benchmarks"):
     """Get benchmark information from a name.
     Args:
         name (str): Name of the benchmark. Can be a group name or a
@@ -214,7 +214,7 @@ def get_benchmark_from_name(name):
     if not name:
         return None
 
-    benchmarks = list_benchmarks()
+    benchmarks = list_benchmarks(folder)
 
     if name in benchmarks:
         return {name: benchmarks[name]}
@@ -238,6 +238,9 @@ def get_benchmark_from_name(name):
 
 def main(args):
     logging.getLogger().setLevel(getattr(logging, args.log_level.upper()))
+
+    args.benchmarks_folder = utils.get_absolute_path(args.benchmarks_folder)
+
     if args.operation == "list":
         benchmarks = list_benchmarks(args.benchmarks_folder)
 

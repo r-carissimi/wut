@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 
 
 def add_log_level_argument(parser):
@@ -141,3 +142,25 @@ def determine_benchmark_metrics(results, benchmarks_list):
     logging.debug(f"Benchmark metrics: {benchmark_metrics}")
 
     return benchmark_metrics
+
+
+def get_absolute_path(path):
+    """Get the absolute path of a given path. The path can be relative or absolute.
+    If the path is relative, it has to be relative to the project root.
+    The function assumes to be called from a script in the "tools" folder.
+
+    Args:
+        path (str): The path to convert to an absolute path.
+
+    Returns:
+        str: The absolute path.
+    """
+
+    # We use os.path.dirname two times because the script is in the tools
+    # folder and we want to get the runtimes folder.
+
+    if not os.path.isabs(path):
+        script_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        path = os.path.join(script_dir, path)
+
+    return path
