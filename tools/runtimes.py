@@ -131,9 +131,46 @@ def get_runtime_from_name(name, file="runtimes/runtimes.json"):
 
 
 def _list_available_runtimes(installers_folder="installers"):
-    """List available runtimes."""
+    """List available runtimes.
 
-    print("Feature not implemented")
+    Args:
+        installers_folder (str): Path to the folder containing installer JSON files.
+
+    Returns:
+        list[dict]: List of available runtimes, each represented as a dictionary.
+    """
+    if not os.path.exists(installers_folder):
+        logging.error(f"{installers_folder} folder not found.")
+        return []
+    if not os.path.isdir(installers_folder):
+        logging.error(f"{installers_folder} is not a directory.")
+        return []
+    if os.listdir(installers_folder) == []:
+        logging.warning(f"{installers_folder} is empty.")
+        return []
+
+    runtimes = []
+    for entry in os.scandir(installers_folder):
+        if entry.is_file() and entry.name.endswith(".json"):
+            try:
+                with open(entry.path, "r") as f:
+                    runtime = json.load(f)
+                    if not isinstance(runtime, dict) or "name" not in runtime:
+                        logging.warning(
+                            f"Invalid or missing 'name' in {entry.name}. Skipping."
+                        )
+                        continue
+                    runtimes.append(runtime)
+            except json.JSONDecodeError as e:
+                logging.error(f"Failed to parse {entry.name}: {e}")
+            except Exception as e:
+                logging.error(f"Unexpected error while processing {entry.name}: {e}")
+
+    if not runtimes:
+        logging.warning("No valid runtimes found in installers folder.")
+        return []
+
+    return runtimes
 
 
 def main(args):
@@ -144,13 +181,19 @@ def main(args):
             print("No runtimes found.")
             return
 
-        print("Runtimes available:")
+        print("Runtimes installed:")
         for runtime in runtimes_list:
             logging.debug(f"Found runtime: {runtime}")
             print(f" * {runtime['name']}: {runtime['desc']}")
 
     elif args.operation == "available":
-        _list_available_runtimes(args.installers_folder)
+        available_runtimes = _list_available_runtimes(args.installers_folder)
+        if not available_runtimes:
+            print("No runtimes found.")
+            return
+        print("Available runtimes:")
+        for runtime in available_runtimes:
+            print(f" * {runtime['name']}: {runtime['desc']}")
 
     else:
         print("Unknown operation. Use 'list' to see available runtimes.")
