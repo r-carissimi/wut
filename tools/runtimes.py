@@ -6,6 +6,7 @@ This module provides a command-line interface (CLI) for managing WebAssembly run
 import json
 import logging
 import os
+import shutil
 
 from . import utils
 
@@ -76,7 +77,30 @@ def parse(parser):
         help="Path to the folder containing runtimes (default: runtimes)",
     )
 
-    # TODO: add "remove" command to remove a runtime
+    # "remove" command to remove a runtime
+    remove_parser = subparsers.add_parser(
+        "remove",
+        help=_remove_runtime.__doc__.split("\n")[0],
+        description=_remove_runtime.__doc__.split("\n")[0],
+    )
+
+    remove_parser.add_argument(
+        "name",
+        help="Name of the runtime to remove",
+        type=str,
+    )
+
+    remove_parser.add_argument(
+        "--runtimes-file",
+        default="runtimes/runtimes.json",
+        help="Path to the JSON file containing runtimes (default: runtimes/runtimes.json)",
+    )
+
+    remove_parser.add_argument(
+        "--runtimes-folder",
+        default="runtimes",
+        help="Path to the folder containing runtimes (default: runtimes)",
+    )
 
     for subparser in subparsers.choices.values():
         utils.add_log_level_argument(subparser)
@@ -269,6 +293,40 @@ def _install_runtime(
     # TODO: make runtimes_folder actually do something
 
 
+def _remove_runtime_from_runtimes_file(name, file="runtimes/runtimes.json"):
+    """Remove a runtime from the runtimes.json file."""
+
+    try:
+        runtimes_list = _list_runtimes(file)
+        runtimes_list = [
+            runtime for runtime in runtimes_list if runtime["name"] != name
+        ]
+
+        with open(file, "w") as f:
+            json.dump({"runtimes": runtimes_list}, f, indent=4)
+
+        logging.debug(f"Removed {name} from {file}.")
+    except Exception as e:
+        logging.error(f"Failed to remove runtime from {file}: {e}")
+
+
+def _remove_runtime(name, runtimes_folder="runtimes", runtimes_file="runtimes.json"):
+    """Remove a runtime."""
+
+    logging.debug(f"Removing {name}...")
+
+    # Delete the corresponding folder
+    runtime_folder = os.path.join(runtimes_folder, name)
+    if os.path.exists(runtime_folder):
+        shutil.rmtree(runtime_folder)
+        logging.info(f"Removed {runtime_folder}.")
+    else:
+        logging.warning(f"{runtime_folder} does not exist.")
+
+    # Remove the runtime from the runtimes.json file
+    _remove_runtime_from_runtimes_file(name, runtimes_file)
+
+
 def main(args):
     logging.getLogger().setLevel(getattr(logging, args.log_level.upper()))
     if args.operation == "list":
@@ -308,8 +366,17 @@ def main(args):
         _install_runtime(runtime, args.runtimes_folder, args.runtimes_file)
 
     elif args.operation == "remove":
-        # TODO: implement remove
-        print("Remove operation not implemented yet.")
+        # Check if the runtime is installed
+        installed_runtimes = _list_runtimes(args.runtimes_file)
+        if not any(rt["name"] == args.name for rt in installed_runtimes):
+            print(f"Runtime {args.name} is not installed.")
+            return
+
+        # Get the runtime information
+        runtime = get_runtime_from_name(args.name, args.runtimes_file)
+
+        # Remove the runtime
+        _remove_runtime(args.name, args.runtimes_folder, args.runtimes_file)
 
     else:
         print("Unknown operation. Use 'list' to see available runtimes.")
