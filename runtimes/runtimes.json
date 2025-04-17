@@ -3,6 +3,7 @@
         {
             "name": "wasmer",
             "command": "/opt/homebrew/bin/wasmer",
+            "version-command": "/opt/homebrew/bin/wasmer -V",
             "desc": "Wasmer is a standalone WebAssembly runtime that can run WebAssembly binaries"
         },
         {

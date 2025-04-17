@@ -102,6 +102,25 @@ def parse(parser):
         help="Path to the folder containing runtimes (default: runtimes)",
     )
 
+    # "version" command to get the version of all runtimes
+    version_parser = subparsers.add_parser(
+        "version",
+        help="Get the version of all runtimes",
+        description="Get the version of all runtimes",
+    )
+
+    version_parser.add_argument(
+        "--runtimes-file",
+        default="runtimes/runtimes.json",
+        help="Path to the JSON file containing runtimes (default: runtimes/runtimes.json)",
+    )
+
+    version_parser.add_argument(
+        "--runtimes-folder",
+        default="runtimes",
+        help="Path to the folder containing runtimes (default: runtimes)",
+    )
+
     for subparser in subparsers.choices.values():
         utils.add_log_level_argument(subparser)
 
@@ -327,6 +346,28 @@ def _remove_runtime(name, runtimes_folder="runtimes", runtimes_file="runtimes.js
     _remove_runtime_from_runtimes_file(name, runtimes_file)
 
 
+def _get_runtime_version(command, runtimes_folder="runtimes"):
+    """Get the version of a runtime.
+
+    Args:
+        command (str): The command to run to get the version.
+        runtimes_folder (str): Path to the folder containing runtimes.
+
+    Returns:
+        str: The version of the runtime. Returns None if the version could not be determined.
+    """
+
+    process = os.popen(f"cd {runtimes_folder} && " + command)
+    output = process.read()
+    exit_code = process.close() or 0
+
+    if exit_code == 0:
+        return output.strip()
+    else:
+        logging.error(f"Failed to get version: {output}")
+        return None
+
+
 def main(args):
     logging.getLogger().setLevel(getattr(logging, args.log_level.upper()))
     if args.operation == "list":
@@ -377,6 +418,23 @@ def main(args):
 
         # Remove the runtime
         _remove_runtime(args.name, args.runtimes_folder, args.runtimes_file)
+
+    elif args.operation == "version":
+        runtimes_list = _list_runtimes(args.runtimes_file)
+        if not runtimes_list:
+            print("No runtimes found.")
+            return
+
+        print("Versions installed:")
+        for runtime in runtimes_list:
+            logging.debug(f"Found runtime: {runtime}")
+            version = _get_runtime_version(
+                runtime["version-command"], args.runtimes_folder
+            )
+            if version:
+                print(f" * {runtime['name']}: {version}")
+            else:
+                logging.warning(f"Failed to get version for {runtime['name']}.")
 
     else:
         print("Unknown operation. Use 'list' to see available runtimes.")
