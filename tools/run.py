@@ -69,17 +69,14 @@ def parse(parser):
     return parser
 
 
-def _get_runtimes_from_names(runtimes_list, file="runtimes/runtimes.json"):
-    runtimes_ = []
-    for runtime_name in runtimes_list:
-        if runtime_name == "all":
-            continue
+def _filter_runtimes_by_name(selected_runtimes, runtimes_list):
+    """Returns only the runtimes that are in the selected_runtimes list."""
 
-        r = runtimes.get_runtime_from_name(runtime_name, file)
-        if r is not None:
-            runtimes_.append(r)
-
-    return runtimes_
+    filtered_runtimes = []
+    for runtime in runtimes_list:
+        if runtime["name"] in selected_runtimes:
+            filtered_runtimes.append(runtime)
+    return filtered_runtimes
 
 
 def _get_benchmarks_from_names(benchmarks_list, benchmarks_folder="benchmarks"):
@@ -214,14 +211,23 @@ def main(args):
     args.runtimes_file = utils.get_absolute_path(args.runtimes_file)
     args.results_folder = utils.get_absolute_path(args.results_folder)
 
-    # TODO: Support subruntimes
-
     # Get the runtime objects from the command line arguments
-    runtimes_list = args.runtimes
-    if runtimes_list == ["all"]:
-        runtimes_list = runtimes.list_runtimes(file=args.runtimes_file)
-    else:
-        runtimes_list = _get_runtimes_from_names(runtimes_list, file=args.runtimes_file)
+    runtimes_list = runtimes.list_runtimes(file=args.runtimes_file)
+
+    # "all" means subruntimes as well. we need to bring them to the top level.
+    # Since we're at it, we'll also keep command and name only
+    flat_runtimes = []
+
+    for runtime in runtimes_list:
+        subruntimes = runtime.pop("subruntimes", [])
+        flat_runtimes.append({"name": runtime["name"], "command": runtime["command"]})
+        for sub in subruntimes:
+            flat_runtimes.append({"name": sub["name"], "command": sub["command"]})
+
+    runtimes_list = flat_runtimes
+
+    if "all" not in args.runtimes:
+        runtimes_list = _filter_runtimes_by_name(args.runtimes, runtimes_list)
 
     # If path to the runtimes is not absolute, prepend the path to the runtimes folder
     for r in runtimes_list:
