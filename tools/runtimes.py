@@ -234,14 +234,8 @@ def _list_available_runtimes(installers_folder="installers"):
         list[dict]: List of available runtimes, each represented as a dictionary.
     """
 
-    if not os.path.exists(installers_folder):
-        logging.error(f"{installers_folder} folder not found.")
-        return []
     if not os.path.isdir(installers_folder):
-        logging.error(f"{installers_folder} is not a directory.")
-        return []
-    if os.listdir(installers_folder) == []:
-        logging.warning(f"{installers_folder} is empty.")
+        logging.error(f"{installers_folder} is not a valid directory.")
         return []
 
     runtimes = []
@@ -250,20 +244,17 @@ def _list_available_runtimes(installers_folder="installers"):
             try:
                 with open(entry.path, "r") as f:
                     runtime = json.load(f)
-                    if not isinstance(runtime, dict) or "name" not in runtime:
-                        logging.warning(
-                            f"Invalid or missing 'name' in {entry.name}. Skipping."
-                        )
-                        continue
+                if isinstance(runtime, dict) and "name" in runtime:
                     runtimes.append(runtime)
-            except json.JSONDecodeError as e:
-                logging.error(f"Failed to parse {entry.name}: {e}")
-            except Exception as e:
-                logging.error(f"Unexpected error while processing {entry.name}: {e}")
+                else:
+                    logging.warning(
+                        f"Invalid or missing 'name' in {entry.name}. Skipping."
+                    )
+            except (json.JSONDecodeError, Exception) as e:
+                logging.error(f"Error processing {entry.name}: {e}")
 
     if not runtimes:
         logging.warning("No valid runtimes found in installers folder.")
-        return []
 
     return runtimes
 
@@ -295,9 +286,7 @@ def _add_runtime_to_runtimes_file(runtime, file="runtimes/runtimes.json"):
     try:
         runtimes_list = list_runtimes(file)
 
-        if "install-command" in runtime:
-            del runtime["install-command"]
-
+        runtime.pop("install-command", None)
         runtimes_list.append(runtime)
 
         with open(file, "w") as f:
@@ -308,59 +297,53 @@ def _add_runtime_to_runtimes_file(runtime, file="runtimes/runtimes.json"):
         logging.error(f"Failed to add runtime to {file}: {e}")
 
 
+def _execute_runtime_command(runtime, command_key, runtimes_folder="runtimes"):
+    """Execute a runtime command (install/update).
+
+    Args:
+        runtime (dict): Runtime information.
+        command_key (str): Key in the runtime dictionary for the command to execute.
+        runtimes_folder (str): Path to the folder containing runtimes.
+
+    Returns:
+        bool: True if the command executed successfully, False otherwise.
+    """
+    logging.info(f"Executing {command_key} for {runtime['name']}...")
+
+    process = os.popen(f"cd {runtimes_folder} &&" + runtime[command_key])
+    output = process.read()
+
+    logging.info(f"{output}")
+
+    if process.close() is None:
+        # Check that the runtime actually works
+        version = _get_runtime_version(runtime["version-command"], runtimes_folder)
+        if version is None:
+            logging.error(
+                f"Failed to get version for {runtime['name']}. Probably not executed correctly."
+            )
+            return False
+
+        logging.info(f"{runtime['name']} {command_key} executed successfully.")
+        return True
+    else:
+        logging.error(f"Failed to execute {command_key} for {runtime['name']}.")
+        return False
+
+
 def _install_runtime(
     runtime, runtimes_folder="runtimes", runtimes_file="runtimes.json"
 ):
     """Installs a runtime."""
 
-    logging.info(f"Installing {runtime['name']}...")
-
-    process = os.popen(f"cd {runtimes_folder} &&" + runtime["install-command"])
-    output = process.read()
-
-    logging.info(f"{output}")
-
-    # Add the runtime to the runtimes.json file if the installation was successful
-    if process.close() is None:
-        # Check that the runtime actually works
-        version = _get_runtime_version(runtime["version-command"], runtimes_folder)
-        if version is None:
-            logging.error(
-                f"Failed to get version for {runtime['name']}. Probably not installed correctly."
-            )
-            return
-
-        logging.info(f"{runtime['name']} installed successfully.")
+    if _execute_runtime_command(runtime, "install-command", runtimes_folder):
         _add_runtime_to_runtimes_file(runtime, runtimes_file)
-    else:
-        logging.error(f"Failed to install {runtime['name']}.")
-        return
 
 
 def _update_runtime(runtime, runtimes_folder="runtimes"):
     """Update a runtime."""
 
-    logging.info(f"Installing {runtime['name']}...")
-
-    process = os.popen(f"cd {runtimes_folder} &&" + runtime["update-command"])
-    output = process.read()
-
-    logging.info(f"{output}")
-
-    # Add the runtime to the runtimes.json file if the installation was successful
-    if process.close() is None:
-        # Check that the runtime actually works
-        version = _get_runtime_version(runtime["version-command"], runtimes_folder)
-        if version is None:
-            logging.error(
-                f"Failed to get version for {runtime['name']}. Probably not updated correctly."
-            )
-            return
-
-        logging.info(f"{runtime['name']} updated successfully.")
-    else:
-        logging.error(f"Failed to update {runtime['name']}.")
-        return
+    _execute_runtime_command(runtime, "update-command", runtimes_folder)
 
 
 def _remove_runtime_from_runtimes_file(name, file="runtimes/runtimes.json"):
@@ -419,11 +402,11 @@ def _get_runtime_version(command, runtimes_folder="runtimes"):
     output = process.read()
     exit_code = process.close() or 0
 
-    if exit_code == 0:
-        return output.strip()
-    else:
+    if exit_code != 0:
         logging.error(f"Failed to get version: {output}")
         return None
+
+    return output.strip()
 
 
 def main(args):
@@ -540,7 +523,7 @@ def main(args):
             return
 
         # Update the runtime
-        _update_runtime(runtime, args.runtimes_folder, args.runtimes_file)
+        _update_runtime(runtime, args.runtimes_folder)
 
     else:
         print("Unknown operation. Use 'list' to see available runtimes.")
