@@ -9,6 +9,8 @@ import os
 
 from . import utils
 
+DEFAULT_BENCHMARKS_FOLDER = "benchmarks"
+
 
 def parse(parser):
     """Parse command-line arguments for the benchmarks module.
@@ -26,8 +28,8 @@ def parse(parser):
 
     list_parser.add_argument(
         "--benchmarks-folder",
-        default="benchmarks",
-        help="Path to the folder containing benchmarks (default: benchmarks)",
+        default=DEFAULT_BENCHMARKS_FOLDER,
+        help=f"Path to the folder containing benchmarks (default: {DEFAULT_BENCHMARKS_FOLDER}).",
     )
 
     for subparser in subparsers.choices.values():
@@ -71,38 +73,32 @@ def _parse_benchmark_json(file):
                         "path": "path/to/benchmark2"
                     }
                 ]
-    Raises:
-        FileNotFoundError: If the specified file does not exist.
-        NotADirectoryError: If the specified path is not a directory.
     """
 
-    if os.path.getsize(os.path.join(file)) == 0:
+    if os.path.getsize(file) == 0:
         logging.info(f"{file} is empty. Skipping.")
-        return list()
+        return []
 
-    benchmarks = []
+    try:
+        with open(file, "r") as f:
+            data = json.load(f)
+    except json.JSONDecodeError as e:
+        logging.info(f"Failed to parse JSON in {file}: {e}")
+        return []
 
-    with open(file, "r") as f:
-        try:
-            benchmarks_list = json.load(f)
-            if not benchmarks_list or "benchmarks" not in benchmarks_list:
-                logging.info(f"No benchmarks found in {file}. Skipping.")
-                return []
+    benchmarks = data.get("benchmarks", [])
+    if not benchmarks:
+        logging.info(f"No benchmarks found in {file}. Skipping.")
+        return []
 
-            benchmarks_list = benchmarks_list["benchmarks"]
-            for benchmark in benchmarks_list:
-                if "name" not in benchmark or "path" not in benchmark:
-                    logging.info(f"Invalid benchmark format in {file}. Skipping.")
-                    continue
-
-                benchmarks.append(benchmark)
-        except json.JSONDecodeError as e:
-            logging.info(f"Failed to parse JSON in {file}: {e}")
-
-    return benchmarks
+    return [
+        benchmark
+        for benchmark in benchmarks
+        if "name" in benchmark and "path" in benchmark
+    ]
 
 
-def list_groups(folder="benchmarks"):
+def list_groups(folder=DEFAULT_BENCHMARKS_FOLDER):
     """List all groups in the benchmarks folder.
 
     Args:
@@ -115,18 +111,14 @@ def list_groups(folder="benchmarks"):
         list: List of benchmark groups, defined as all subfolders in the
               benchmarks folder that contain a "benchmarks.json" file.
               List is empty if no subfolders are found.
-
-    Raises:
-        FileNotFoundError: If the specified folder does not exist.
-        NotADirectoryError: If the specified path is not a directory.
     """
 
     if not os.path.exists(folder):
         logging.error(f"{folder} folder not found.")
-        raise FileNotFoundError(f"{folder} folder not found.")
+        return []
     if not os.path.isdir(folder):
         logging.error(f"{folder} is not a directory.")
-        raise NotADirectoryError(f"{folder} is not a directory.")
+        return []
 
     groups = [
         f
@@ -137,7 +129,7 @@ def list_groups(folder="benchmarks"):
     return groups
 
 
-def list_benchmarks(folder="benchmarks"):
+def list_benchmarks(folder=DEFAULT_BENCHMARKS_FOLDER):
     """List available benchmarks.
 
     Args:
@@ -167,30 +159,18 @@ def list_benchmarks(folder="benchmarks"):
                         }
                     ]
                 }
-
-    Raises:
-        FileNotFoundError: If the specified folder does not exist.
-        NotADirectoryError: If the specified path is not a directory.
     """
 
-    groups = list_groups(folder)
-
-    benchmarks = dict()
-
-    for group in groups:
-        logging.debug(f"Found benchmark group: {group}")
-        file = os.path.join(folder, group, "benchmarks.json")
-        list_benchmarks = _parse_benchmark_json(file)
-        if not list_benchmarks:
-            logging.info(f"No benchmarks found in {file}. Skipping.")
-            continue
-        benchmarks[group] = list_benchmarks
-        logging.debug(f"Found benchmarks: {benchmarks[group]}")
+    benchmarks = {
+        group: _parse_benchmark_json(os.path.join(folder, group, "benchmarks.json"))
+        for group in list_groups(folder)
+        if _parse_benchmark_json(os.path.join(folder, group, "benchmarks.json"))
+    }
 
     return benchmarks
 
 
-def get_benchmark_from_name(name, folder="benchmarks"):
+def get_benchmark_from_name(name, folder=DEFAULT_BENCHMARKS_FOLDER):
     """Get benchmark information from a name.
     Args:
         name (str): Name of the benchmark. Can be a group name or a
@@ -216,21 +196,19 @@ def get_benchmark_from_name(name, folder="benchmarks"):
 
     benchmarks = list_benchmarks(folder)
 
-    if name in benchmarks:
-        return {name: benchmarks[name]}
+    if "/" not in name:
+        return {name: benchmarks.get(name)} if name in benchmarks else None
 
-    name = name.split("/")
-    if len(name) != 2:
-        logging.warning(f"Invalid benchmark name: {name}.")
-        return None
-    group = name[0]
-    benchmark = name[1]
+    group, _, benchmark = name.partition("/")
     if group not in benchmarks:
         logging.warning(f"Benchmark group {group} not found.")
         return None
-    for b in benchmarks[group]:
-        if b["name"] == benchmark:
-            return {group: [b]}
+
+    benchmark_info = next(
+        (b for b in benchmarks[group] if b["name"] == benchmark), None
+    )
+    if benchmark_info:
+        return {group: [benchmark_info]}
 
     logging.warning(f"Benchmark {benchmark} not found in group {group}.")
     return None
