@@ -83,9 +83,6 @@ def _get_benchmarks_from_names(benchmarks_list, benchmarks_folder="benchmarks"):
     benchs = dict()
 
     for benchmark_name in benchmarks_list:
-        if benchmark_name == "all":
-            continue
-
         b = benchmarks.get_benchmark_from_name(benchmark_name, benchmarks_folder)
         if b is not None:
             for k, v in b.items():
@@ -216,15 +213,11 @@ def main(args):
 
     # "all" means subruntimes as well. we need to bring them to the top level.
     # Since we're at it, we'll also keep command and name only
-    flat_runtimes = []
-
-    for runtime in runtimes_list:
-        subruntimes = runtime.pop("subruntimes", [])
-        flat_runtimes.append({"name": runtime["name"], "command": runtime["command"]})
-        for sub in subruntimes:
-            flat_runtimes.append({"name": sub["name"], "command": sub["command"]})
-
-    runtimes_list = flat_runtimes
+    runtimes_list = [
+        {"name": runtime["name"], "command": runtime["command"]}
+        for runtime in runtimes_list
+        for runtime in ([runtime] + runtime.pop("subruntimes", []))
+    ]
 
     if "all" not in args.runtimes:
         runtimes_list = _filter_runtimes_by_name(args.runtimes, runtimes_list)
@@ -273,7 +266,7 @@ def main(args):
                 elapsed_time = 0
                 score = 0
 
-            logging.debug(f"No store output enabled: {args.no_store_output}")
+            logging.debug(f"Storing output is disabled: {args.no_store_output}")
 
             # Output is stored unless the user specified not to
             results[r["name"]][b["name"]] = {
