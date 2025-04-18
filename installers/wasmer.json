@@ -9,17 +9,17 @@
 	"subruntimes": [
 		{
 			"name": "wasmer-llvm",
-			"command": "wasmer/bin/wasmer --compiler=llvm",
+			"command": "wasmer/bin/wasmer --llvm",
 			"desc": "Wasmer with LLVM backend."
 		},
 		{
 			"name": "wasmer-cranelift",
-			"command": "wasmer/bin/wasmer --compiler=cranelift",
+			"command": "wasmer/bin/wasmer --cranelift",
 			"desc": "Wasmer with Cranelift backend."
 		},
 		{
 			"name": "wasmer-singlepass",
-			"command": "wasmer/bin/wasmer --compiler=singlepass",
+			"command": "wasmer/bin/wasmer --singlepass",
 			"desc": "Wasmer with Singlepass backend."
 		}
 	]
