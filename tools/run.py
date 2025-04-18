@@ -187,7 +187,7 @@ def _run_benchmark_with_runtime(benchmark, runtime, benchmarks_folder):
     logging.debug(f"Output: {output}")
 
     score = 0
-    if benchmark["score-parser"] is not None:
+    if benchmark.get("score-parser"):
         score = _parse_score(output, benchmark["score-parser"])
 
     return elapsed_time, score, return_code, output
