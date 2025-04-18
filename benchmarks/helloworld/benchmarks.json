@@ -1,0 +1,8 @@
+{
+	"benchmarks": [
+		{
+			"name": "helloworld",
+			"path": "helloworld.wasm"
+		}
+	]
+}
