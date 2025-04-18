@@ -10,6 +10,7 @@ from . import utils
 
 def parse(parser):
     """Parse command-line arguments for the runtime module."""
+
     parser.add_argument(
         "results_file",
         help="Path to the results file to plot",
@@ -27,6 +28,92 @@ def parse(parser):
     return parser
 
 
+def _compute_statistics(results):
+    """Compute average, min, and max values for each benchmark and runtime."""
+
+    statistics = {}
+    for runtime, benchmarks in results.items():
+        statistics[runtime] = {}
+        for benchmark, runs in benchmarks.items():
+            elapsed_times = [run["elapsed_time"] for run in runs]
+            scores = [run["score"] for run in runs]
+            statistics[runtime][benchmark] = {
+                "elapsed_time": {
+                    "avg": sum(elapsed_times) / len(elapsed_times),
+                    "min": min(elapsed_times),
+                    "max": max(elapsed_times),
+                },
+                "score": {
+                    "avg": sum(scores) / len(scores),
+                    "min": min(scores),
+                    "max": max(scores),
+                },
+            }
+
+    return statistics
+
+
+def _collect_benchmarks(results):
+    """Collect and sort benchmark names."""
+
+    benchmarks_set = set()
+    for runtime in results.values():
+        benchmarks_set.update(runtime.keys())
+    return sorted(benchmarks_set)
+
+
+def _determine_benchmark_metrics(results, benchmarks_list):
+    """Determine the metric to use for each benchmark.
+    If any runtime has a score > 0, use score; otherwise, use elapsed_time.
+    """
+
+    benchmark_metrics = {}
+    for benchmark in benchmarks_list:
+        use_score = any(
+            results[runtime][benchmark]["score"]["avg"] > 0
+            for runtime in results
+            if benchmark in results[runtime]
+        )
+        benchmark_metrics[benchmark] = "score" if use_score else "elapsed_time"
+
+    return benchmark_metrics
+
+
+def _transpose_benchmark_data(results, benchmarks_list, benchmark_metrics):
+    """Transpose the benchmark data for plotting.
+
+    The expected format is:
+    {
+        "runtime1": {
+            "benchmark1": {"avg": value1, "min": value2, "max": value3},
+            "benchmark2": {...},
+        },
+        "runtime2": {...},
+    }
+
+    The output format is:
+
+    {
+        "benchmark1": {
+            "runtime1": {"avg": value1, "min": value2, "max": value3},
+            "runtime2": {...},
+        },
+        "benchmark2": {...},
+    }
+    """
+
+    raw_values = {
+        benchmark: {
+            runtime: results[runtime][benchmark][benchmark_metrics[benchmark]]
+            for runtime in results
+            if benchmark in results[runtime]
+        }
+        for benchmark in benchmarks_list
+    }
+
+    return raw_values
+
+
 def _normalize_values(benchmarks_list, benchmark_metrics, raw_values):
     """Normalize raw values for each benchmark.
 
@@ -35,23 +122,44 @@ def _normalize_values(benchmarks_list, benchmark_metrics, raw_values):
     """
 
     runtime_data = {
-        runtime: {"values": {}} for runtime in raw_values[benchmarks_list[0]]
+        runtime: {"values": {}, "errors": {}}
+        for runtime in raw_values[benchmarks_list[0]]
     }
     for benchmark in benchmarks_list:
-        values = raw_values[benchmark]
+        values = {
+            runtime: data["avg"] for runtime, data in raw_values[benchmark].items()
+        }
+        errors = {
+            runtime: (data["avg"] - data["min"], data["max"] - data["avg"])
+            for runtime, data in raw_values[benchmark].items()
+        }
         if benchmark_metrics[benchmark] == "score":
-            logging.debug(f"Normalizing scores for {benchmark} with max value")
             max_val = max(values.values())
             for runtime, val in values.items():
                 runtime_data[runtime]["values"][benchmark] = (
                     (val / max_val * 100) if max_val > 0 else 0
                 )
+                runtime_data[runtime]["errors"][benchmark] = (
+                    (
+                        errors[runtime][0] / max_val * 100,
+                        errors[runtime][1] / max_val * 100,
+                    )
+                    if max_val > 0
+                    else (0, 0)
+                )
         else:
-            logging.debug(f"Normalizing elapsed times for {benchmark} with min value")
             min_val = min(val for val in values.values() if val > 0) or 1e-9
             for runtime, val in values.items():
                 runtime_data[runtime]["values"][benchmark] = (
                     (val / min_val * 100) if val > 0 else 0
+                )
+                runtime_data[runtime]["errors"][benchmark] = (
+                    (
+                        errors[runtime][0] / min_val * 100,
+                        errors[runtime][1] / min_val * 100,
+                    )
+                    if val > 0
+                    else (0, 0)
                 )
     return runtime_data
 
@@ -59,7 +167,7 @@ def _normalize_values(benchmarks_list, benchmark_metrics, raw_values):
 def _plot_results(
     runtime_data, benchmarks_list, benchmark_metrics, results_file, plots_folder
 ):
-    """Plot the normalized benchmark results and saves the file"""
+    """Plot the normalized benchmark results with error bars and save the file."""
 
     x = range(len(benchmarks_list))
     bar_width = 0.8 / len(runtime_data)
@@ -68,12 +176,19 @@ def _plot_results(
 
     for i, (runtime, data) in enumerate(runtime_data.items()):
         y_values = [data["values"].get(benchmark, 0) for benchmark in benchmarks_list]
+        y_errors = [
+            data["errors"].get(benchmark, (0, 0)) for benchmark in benchmarks_list
+        ]
+        y_err_lower = [err[0] for err in y_errors]
+        y_err_upper = [err[1] for err in y_errors]
         plt.bar(
             [pos + i * bar_width for pos in x],
             y_values,
             bar_width,
             label=runtime,
             color=colors[i % len(colors)],
+            yerr=[y_err_lower, y_err_upper],
+            capsize=5,
         )
 
     plt.grid(axis="y", linestyle="--", alpha=0.7)
@@ -93,7 +208,7 @@ def _plot_results(
     plot_path = os.path.join(plots_folder, plot_filename)
     plt.savefig(plot_path)
     plt.close()
-    logging.info(f"Saved grouped percentage plot to {plot_path}")
+    logging.info(f"Saved grouped percentage plot with error bars to {plot_path}")
 
 
 def main(args):
@@ -105,15 +220,17 @@ def main(args):
 
     results = utils.load_results_file(args.results_file)
     if not results:
+        logging.info("No results found in the file.")
         return
 
-    benchmarks_list = utils.collect_benchmarks(results)
-    benchmark_metrics = utils.determine_benchmark_metrics(results, benchmarks_list)
-    raw_values = utils.transpose_benchmark_data(
-        results, benchmarks_list, benchmark_metrics
+    statistics = _compute_statistics(results)
+    benchmarks_list = _collect_benchmarks(statistics)
+    benchmark_metrics = _determine_benchmark_metrics(statistics, benchmarks_list)
+    raw_values = _transpose_benchmark_data(
+        statistics, benchmarks_list, benchmark_metrics
     )
-
     runtime_data = _normalize_values(benchmarks_list, benchmark_metrics, raw_values)
+
     _plot_results(
         runtime_data,
         benchmarks_list,
