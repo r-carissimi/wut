@@ -26,22 +26,21 @@ def parse(parser):
     return parser
 
 
-def _write_benchmark_results_to_csv(data, metrics, filename):
+def _write_benchmark_results_to_csv(data, filename):
     """
-    Writes benchmark results from a nested dictionary to a CSV file.
-    Benchmarks can have different sets of runtimes.
+    Writes every run of benchmark results to a CSV file.
 
     The input dict format is:
     {
         "benchmark_name": {
-            "runtime1": value1,
-            "runtime2": value2,
+            "runtime1": [
+                {"elapsed_time": value1, "score": value2, ...},
+                ...
+            ],
             ...
         },
         ...
     }
-
-    The output CSV will have headers: "benchmark", "wasmtime", "wasmer", ...
 
     Args:
         data (dict): Nested dictionary containing benchmark results.
@@ -50,25 +49,34 @@ def _write_benchmark_results_to_csv(data, metrics, filename):
         filename (str): The name of the CSV file to write to.
     """
 
-    # Collecting all unique runtimes in order to create the header
-    all_runtimes = set()
-    for runtimes in data.values():
-        all_runtimes.update(runtimes.keys())
+    logging.debug("Exporting every run to CSV")
 
-    # Sorting runtimes for consistent order in the CSV
-    all_runtimes = sorted(all_runtimes)
-
-    logging.debug(f"Runtimes found in results: {all_runtimes}")
-
-    # Writing to CSV (header first and then rows)
     with open(filename, mode="w", newline="") as csvfile:
         writer = csv.writer(csvfile)
-        writer.writerow(["benchmark"] + all_runtimes)
+
+        # This is to leave out the output of the benchmark from the CSV
+        headers = [
+            "benchmark",
+            "runtime",
+            "run_index",
+            "elapsed_time",
+            "score",
+            "return_code",
+        ]
+        writer.writerow(headers)
+
         for benchmark, runtimes in data.items():
-            row = [benchmark + " (" + metrics[benchmark] + ")"] + [
-                runtimes.get(rt, "") for rt in all_runtimes
-            ]
-            writer.writerow(row)
+            for runtime, runs in runtimes.items():
+                for run_index, run in enumerate(runs):
+                    row = [
+                        benchmark,
+                        runtime,
+                        run_index + 1,
+                        run.get("elapsed_time", ""),
+                        run.get("score", ""),
+                        run.get("return_code", ""),
+                    ]
+                    writer.writerow(row)
 
     logging.info(f"Results exported to {filename}")
 
@@ -84,16 +92,10 @@ def main(args):
     if not results:
         return
 
-    benchmarks_list = utils.collect_benchmarks(results)
-    benchmark_metrics = utils.determine_benchmark_metrics(results, benchmarks_list)
-    raw_values = utils.transpose_benchmark_data(
-        results, benchmarks_list, benchmark_metrics
-    )
-
     # CSV filename is the same as the results file, but with a .csv extension
     filename = os.path.join(
         args.csv_folder,
         os.path.splitext(os.path.basename(args.results_file))[0] + ".csv",
     )
 
-    _write_benchmark_results_to_csv(raw_values, benchmark_metrics, filename)
+    _write_benchmark_results_to_csv(results, filename)

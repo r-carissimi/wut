@@ -64,6 +64,13 @@ def parse(parser):
         help="Path to the folder where results will be saved (default: results)",
     )
 
+    parser.add_argument(
+        "--repeat",
+        type=int,
+        default=1,
+        help="Number of times to repeat each benchmark (default: 1)",
+    )
+
     utils.add_log_level_argument(parser)
 
     return parser
@@ -252,29 +259,35 @@ def main(args):
         for b in _get_benchmarks(benchmarks_list):
             logging.info(f"Running benchmark: {b['name']} with runtime: {r['name']}")
 
-            elapsed_time, score, return_code, output = _run_benchmark_with_runtime(
-                b, r, args.benchmarks_folder
-            )
+            results[r["name"]][b["name"]] = []
 
-            logging.info(f"Elapsed time: {elapsed_time} ns")
-            logging.info(f"Score: {score}")
-            logging.debug(f"Return code: {return_code}")
-            if return_code != 0:
-                logging.warning(
-                    f"Benchmark {b['name']} failed with return code {return_code}"
+            for i in range(args.repeat):
+                logging.info(f"Running iteration {i + 1}/{args.repeat}")
+                elapsed_time, score, return_code, output = _run_benchmark_with_runtime(
+                    b, r, args.benchmarks_folder
                 )
-                elapsed_time = 0
-                score = 0
 
-            logging.debug(f"Storing output is disabled: {args.no_store_output}")
+                logging.info(f"Elapsed time: {elapsed_time} ns")
+                logging.info(f"Score: {score}")
+                logging.debug(f"Return code: {return_code}")
+                if return_code != 0:
+                    logging.warning(
+                        f"Benchmark {b['name']} failed with return code {return_code}"
+                    )
+                    elapsed_time = 0
+                    score = 0
 
-            # Output is stored unless the user specified not to
-            results[r["name"]][b["name"]] = {
-                "elapsed_time": elapsed_time,
-                "score": score,
-                "return_code": return_code,
-                **({"output": output} if not args.no_store_output else {}),
-            }
+                logging.debug(f"Storing output is disabled: {args.no_store_output}")
+
+                # Output is stored unless the user specified not to
+                results[r["name"]][b["name"]].append(
+                    {
+                        "elapsed_time": elapsed_time,
+                        "score": score,
+                        "return_code": return_code,
+                        **({"output": output} if not args.no_store_output else {}),
+                    }
+                )
 
     logging.debug(f"Results: {results}")
 
