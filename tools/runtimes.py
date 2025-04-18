@@ -387,13 +387,18 @@ def _remove_runtime(
 
     logging.debug(f"Removing {name}...")
 
-    # Delete the corresponding folder
-    runtime_folder = os.path.join(runtimes_folder, install_dir)
-    if os.path.exists(runtime_folder):
-        shutil.rmtree(runtime_folder)
-        logging.debug(f"Removed {runtime_folder}.")
+    if install_dir:
+        # Delete the corresponding folder
+        runtime_folder = os.path.join(runtimes_folder, install_dir)
+        if os.path.exists(runtime_folder):
+            shutil.rmtree(runtime_folder)
+            logging.debug(f"Removed {runtime_folder}.")
+        else:
+            logging.warning(f"{runtime_folder} does not exist.")
     else:
-        logging.warning(f"{runtime_folder} does not exist.")
+        logging.warning(
+            f"No install-dir specified for {name}. Skipping folder removal."
+        )
 
     # Remove the runtime from the runtimes.json file
     _remove_runtime_from_runtimes_file(name, runtimes_file)
@@ -486,11 +491,12 @@ def main(args):
         # Get the runtime information
         runtime = get_runtime_from_name(args.name, args.runtimes_file)
 
-        # TODO: remove only if install-dir is specified
-
         # Remove the runtime
         _remove_runtime(
-            args.name, runtime["install-dir"], args.runtimes_folder, args.runtimes_file
+            args.name,
+            runtime.get("install-dir"),
+            args.runtimes_folder,
+            args.runtimes_file,
         )
 
         print(f"Runtime {args.name} removed successfully.")
@@ -525,10 +531,13 @@ def main(args):
             print(f"Runtime {args.name} is not installed.")
             return
 
-        # TODO: update only if command is specified
-
         # Get the runtime information
         runtime = get_runtime_from_name(args.name, args.runtimes_file)
+
+        if not runtime.get("update-command"):
+            logging.debug(f"Runtime {args.name} does not have an update command.")
+            print(f"Runtime {args.name} does not support update.")
+            return
 
         # Update the runtime
         _update_runtime(runtime, args.runtimes_folder, args.runtimes_file)
