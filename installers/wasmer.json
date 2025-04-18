@@ -1,9 +1,26 @@
 {
 	"name": "wasmer",
-	"command": "wasmer/bin/wasmer",
-	"version-command": "wasmer/bin/wasmer --version",
 	"install-command": "curl https://get.wasmer.io -sSfL | HOME=$(mktemp -d) WASMER_DIR='wasmer' sh",
 	"desc": "A standalone WebAssembly runtime for running WebAssembly outside of the browser.",
 	"install-dir": "wasmer",
-	"update-command": "wasmer/bin/wasmer self-update"
+	"version-command": "wasmer/bin/wasmer --version",
+	"update-command": "wasmer/bin/wasmer self-update",
+	"command": "wasmer/bin/wasmer",
+	"subruntimes": [
+		{
+			"name": "wasmer-llvm",
+			"command": "wasmer/bin/wasmer --compiler=llvm",
+			"desc": "Wasmer with LLVM backend."
+		},
+		{
+			"name": "wasmer-cranelift",
+			"command": "wasmer/bin/wasmer --compiler=cranelift",
+			"desc": "Wasmer with Cranelift backend."
+		},
+		{
+			"name": "wasmer-singlepass",
+			"command": "wasmer/bin/wasmer --compiler=singlepass",
+			"desc": "Wasmer with Singlepass backend."
+		}
+	]
 }

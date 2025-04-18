@@ -214,6 +214,8 @@ def main(args):
     args.runtimes_file = utils.get_absolute_path(args.runtimes_file)
     args.results_folder = utils.get_absolute_path(args.results_folder)
 
+    # TODO: Support subruntimes
+
     # Get the runtime objects from the command line arguments
     runtimes_list = args.runtimes
     if runtimes_list == ["all"]:

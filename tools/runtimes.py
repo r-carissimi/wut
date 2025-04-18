@@ -437,6 +437,11 @@ def main(args):
             logging.debug(f"Found runtime: {runtime}")
             print(f" * {runtime['name']}: {runtime['desc']}")
 
+            # Check if runtime has subruntimes
+            if "subruntimes" in runtime:
+                for subruntime in runtime["subruntimes"]:
+                    print(f"   ↳ {subruntime['name']}: {subruntime['desc']}")
+
     elif args.operation == "available":
         args.installers_folder = utils.get_absolute_path(args.installers_folder)
 
@@ -481,6 +486,8 @@ def main(args):
         # Get the runtime information
         runtime = get_runtime_from_name(args.name, args.runtimes_file)
 
+        # TODO: remove only if install-dir is specified
+
         # Remove the runtime
         _remove_runtime(
             args.name, runtime["install-dir"], args.runtimes_folder, args.runtimes_file
@@ -517,6 +524,8 @@ def main(args):
         if not any(rt["name"] == args.name for rt in installed_runtimes):
             print(f"Runtime {args.name} is not installed.")
             return
+
+        # TODO: update only if command is specified
 
         # Get the runtime information
         runtime = get_runtime_from_name(args.name, args.runtimes_file)
