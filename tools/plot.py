@@ -35,6 +35,11 @@ def _compute_statistics(results):
     for runtime, benchmarks in results.items():
         statistics[runtime] = {}
         for benchmark, runs in benchmarks.items():
+            # filters out runs with elapsed_time <= 0.
+            runs = [run for run in runs if run["elapsed_time"] > 0]
+            if not runs:
+                continue
+
             elapsed_times = [run["elapsed_time"] for run in runs]
             scores = [run["score"] for run in runs]
             statistics[runtime][benchmark] = {
@@ -49,6 +54,10 @@ def _compute_statistics(results):
                     "max": max(scores),
                 },
             }
+
+        # Remove runtimes with no valid benchmarks in order to avoid empty plots later
+        if not statistics[runtime]:
+            del statistics[runtime]
 
     return statistics
 
@@ -224,6 +233,11 @@ def main(args):
         return
 
     statistics = _compute_statistics(results)
+    # Avoids empty plots
+    if not statistics:
+        logging.info("No valid results found in the file.")
+        return
+
     benchmarks_list = _collect_benchmarks(statistics)
     benchmark_metrics = _determine_benchmark_metrics(statistics, benchmarks_list)
     raw_values = _transpose_benchmark_data(

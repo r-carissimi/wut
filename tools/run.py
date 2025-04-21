@@ -196,6 +196,18 @@ def _run_benchmark_with_runtime(
 
     logging.debug(f"Output: {output}")
 
+    # Validate the output with a regex, if specified
+    if benchmark.get("output-validator") and not re.search(
+        benchmark.get("output-validator"), output
+    ):
+        logging.warning(
+            f"Output validation failed for benchmark {benchmark['name']} with runtime {runtime['name']}"
+        )
+        return 0, 0, return_code, output
+    logging.debug(
+        f"Output validation succeeded for benchmark {benchmark['name']} with runtime {runtime['name']}"
+    )
+
     score = 0
     if benchmark.get("score-parser"):
         score = _parse_score(output, benchmark["score-parser"])

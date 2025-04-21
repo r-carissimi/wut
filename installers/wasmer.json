@@ -5,22 +5,28 @@
 	"install-dir": "wasmer",
 	"version-command": "wasmer/bin/wasmer --version",
 	"update-command": "wasmer/bin/wasmer self-update",
-	"command": "wasmer/bin/wasmer",
+	"command": "wasmer/bin/wasmer run --enable-all",
 	"subruntimes": [
 		{
 			"name": "wasmer-llvm",
-			"command": "wasmer/bin/wasmer --llvm",
+			"command": "wasmer/bin/wasmer run --enable-all --llvm",
 			"desc": "Wasmer with LLVM backend."
 		},
 		{
 			"name": "wasmer-cranelift",
-			"command": "wasmer/bin/wasmer --cranelift",
+			"command": "wasmer/bin/wasmer run --enable-all --cranelift",
 			"desc": "Wasmer with Cranelift backend."
 		},
 		{
 			"name": "wasmer-singlepass",
-			"command": "wasmer/bin/wasmer --singlepass",
+			"command": "wasmer/bin/wasmer run --enable-all --singlepass",
 			"desc": "Wasmer with Singlepass backend."
+		},
+		{
+			"name": "wasmer-aot",
+			"command": "wasmer/bin/wasmer run --enable-all",
+			"desc": "Wasmer with AOT",
+			"aot-command": "wasmer/bin/wasmer compile -o {output} {input}"
 		}
 	]
 }

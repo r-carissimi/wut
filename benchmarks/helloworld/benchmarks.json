@@ -2,7 +2,8 @@
 	"benchmarks": [
 		{
 			"name": "helloworld",
-			"path": "helloworld.wasm"
+			"path": "helloworld.wasm",
+			"output-validator": "hello world"
 		}
 	]
 }

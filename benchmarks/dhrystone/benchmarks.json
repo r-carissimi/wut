@@ -3,42 +3,32 @@
 		{
 			"name": "dhrystone1B",
 			"path": "dhrystone1B.wasm",
-			"args": [
-
-			],
-			"score-parser": "Dhrystones per Second:\\s+(?P<score>\\d+)"
+			"score-parser": "Dhrystones per Second:\\s+(?P<score>\\d+)",
+			"output-validator": "Dhrystones per Second:"
 		},
 		{
 			"name": "dhrystone1M",
 			"path": "dhrystone1M.wasm",
-			"args": [
-
-			],
-			"score-parser": "Dhrystones per Second:\\s+(?P<score>\\d+)"
+			"score-parser": "Dhrystones per Second:\\s+(?P<score>\\d+)",
+			"output-validator": "Dhrystones per Second:"
 		},
 		{
 			"name": "dhrystone10M",
 			"path": "dhrystone10M.wasm",
-			"args": [
-
-			],
-			"score-parser": "Dhrystones per Second:\\s+(?P<score>\\d+)"
+			"score-parser": "Dhrystones per Second:\\s+(?P<score>\\d+)",
+			"output-validator": "Dhrystones per Second:"
 		},
 		{
 			"name": "dhrystone100M",
 			"path": "dhrystone100M.wasm",
-			"args": [
-
-			],
-			"score-parser": "Dhrystones per Second:\\s+(?P<score>\\d+)"
+			"score-parser": "Dhrystones per Second:\\s+(?P<score>\\d+)",
+			"output-validator": "Dhrystones per Second:"
 		},
 		{
 			"name": "dhrystoneMAX",
 			"path": "dhrystoneMAX.wasm",
-			"args": [
-
-			],
-			"score-parser": "Dhrystones per Second:\\s+(?P<score>\\d+)"
+			"score-parser": "Dhrystones per Second:\\s+(?P<score>\\d+)",
+			"output-validator": "Dhrystones per Second:"
 		}
 	]
 }
