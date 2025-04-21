@@ -178,6 +178,29 @@ def _run_benchmark_with_runtime(benchmark, runtime, benchmarks_folder):
         benchmark["path"],
     )
 
+    # It's outside of the if statement so that we can delete the file later
+    precompiled_path = os.path.splitext(benchmark_path)[0] + ".aot"
+
+    # AOT compilation, if runtime has "aot-command" not empty
+    if runtime["aot-command"]:
+        aot_command = runtime["aot-command"].format(
+            input=benchmark_path, output=precompiled_path
+        )
+        logging.debug(f"Running AOT command: '{aot_command}'")
+        process = os.popen(aot_command)
+        output = process.read()
+        logging.debug(f"AOT output: {output}")
+        if process.close() is not None:
+            logging.error(
+                f"AOT compilation failed for {benchmark['name']} with runtime {runtime['name']}"
+            )
+            return 0, 0, 1, output
+
+        logging.info(
+            f"AOT compilation succeeded for {benchmark['name']} with runtime {runtime['name']}"
+        )
+        benchmark_path = precompiled_path
+
     logging.debug(f"Running '{runtime['command']} {benchmark_path}'")
 
     start_time = time.perf_counter_ns()
@@ -193,6 +216,11 @@ def _run_benchmark_with_runtime(benchmark, runtime, benchmarks_folder):
     score = 0
     if benchmark.get("score-parser"):
         score = _parse_score(output, benchmark["score-parser"])
+
+    # AOT cleanup
+    if os.path.exists(precompiled_path):
+        os.remove(precompiled_path)
+        logging.debug(f"Removed precompiled file: {precompiled_path}")
 
     return elapsed_time, score, return_code, output
 
@@ -221,7 +249,11 @@ def main(args):
     # "all" means subruntimes as well. we need to bring them to the top level.
     # Since we're at it, we'll also keep command and name only
     runtimes_list = [
-        {"name": runtime["name"], "command": runtime["command"]}
+        {
+            "name": runtime["name"],
+            "command": runtime["command"],
+            "aot-command": runtime.get("aot-command", ""),
+        }
         for runtime in runtimes_list
         for runtime in ([runtime] + runtime.pop("subruntimes", []))
     ]
@@ -231,11 +263,12 @@ def main(args):
 
     # If path to the runtimes is not absolute, prepend the path to the runtimes folder
     for r in runtimes_list:
-        if not os.path.isabs(r["command"]):
-            r["command"] = os.path.join(
-                os.path.dirname(os.path.abspath(args.runtimes_file)),
-                r["command"],
-            )
+        for key in ["command", "aot-command"]:
+            if r.get(key) and not os.path.isabs(r[key]):
+                r[key] = os.path.join(
+                    os.path.dirname(os.path.abspath(args.runtimes_file)),
+                    r[key],
+                )
 
     logging.debug(f"Using runtimes: {[r['name'] for r in runtimes_list]}")
 
@@ -261,6 +294,7 @@ def main(args):
 
             results[r["name"]][b["name"]] = []
 
+            # TODO: optimize repeat with AOT, should be compiled only once
             for i in range(args.repeat):
                 logging.info(f"Running iteration {i + 1}/{args.repeat}")
                 elapsed_time, score, return_code, output = _run_benchmark_with_runtime(
