@@ -154,7 +154,9 @@ def _parse_score(output, score_parser):
     return 0
 
 
-def _run_benchmark_with_runtime(benchmark, runtime, benchmarks_folder):
+def _run_benchmark_with_runtime(
+    benchmark, runtime, benchmarks_folder, precompiled_path=None
+):
     """Run a benchmark with a given runtime.
 
     Args:
@@ -162,6 +164,7 @@ def _run_benchmark_with_runtime(benchmark, runtime, benchmarks_folder):
         runtime (dict): The runtime to use.
         benchmarks_folder (str): The folder containing the benchmarks. Can
                                  be relative or absolute.
+        precompiled_path (str): Path to the precompiled AOT file, if applicable.
 
     Returns:
         tuple: A tuple containing
@@ -178,27 +181,7 @@ def _run_benchmark_with_runtime(benchmark, runtime, benchmarks_folder):
         benchmark["path"],
     )
 
-    # It's outside of the if statement so that we can delete the file later
-    precompiled_path = os.path.splitext(benchmark_path)[0] + ".aot"
-
-    # AOT compilation, if runtime has "aot-command" not empty
-    if runtime["aot-command"]:
-        aot_command = runtime["aot-command"].format(
-            input=benchmark_path, output=precompiled_path
-        )
-        logging.debug(f"Running AOT command: '{aot_command}'")
-        process = os.popen(aot_command)
-        output = process.read()
-        logging.debug(f"AOT output: {output}")
-        if process.close() is not None:
-            logging.error(
-                f"AOT compilation failed for {benchmark['name']} with runtime {runtime['name']}"
-            )
-            return 0, 0, 1, output
-
-        logging.info(
-            f"AOT compilation succeeded for {benchmark['name']} with runtime {runtime['name']}"
-        )
+    if precompiled_path:
         benchmark_path = precompiled_path
 
     logging.debug(f"Running '{runtime['command']} {benchmark_path}'")
@@ -217,12 +200,50 @@ def _run_benchmark_with_runtime(benchmark, runtime, benchmarks_folder):
     if benchmark.get("score-parser"):
         score = _parse_score(output, benchmark["score-parser"])
 
-    # AOT cleanup
-    if os.path.exists(precompiled_path):
-        os.remove(precompiled_path)
-        logging.debug(f"Removed precompiled file: {precompiled_path}")
-
     return elapsed_time, score, return_code, output
+
+
+def _compile_benchmark(benchmark, runtime, benchmarks_folder):
+    """Compile a benchmark using AOT if applicable.
+
+    Args:
+        benchmark (dict): The benchmark to compile.
+        runtime (dict): The runtime to use.
+        benchmarks_folder (str): The folder containing the benchmarks.
+
+    Returns:
+        str: Path to the precompiled AOT file, or None if AOT is not applicable.
+    """
+
+    benchmarks_folder = utils.get_absolute_path(benchmarks_folder)
+
+    benchmark_path = os.path.join(
+        benchmarks_folder,
+        benchmark["path"],
+    )
+
+    precompiled_path = os.path.splitext(benchmark_path)[0] + ".aot"
+
+    if runtime["aot-command"]:
+        aot_command = runtime["aot-command"].format(
+            input=benchmark_path, output=precompiled_path
+        )
+        logging.debug(f"Running AOT command: '{aot_command}'")
+        process = os.popen(aot_command)
+        output = process.read()
+        logging.debug(f"AOT output: {output}")
+        if process.close() is not None:
+            logging.error(
+                f"AOT compilation failed for {benchmark['name']} with runtime {runtime['name']}"
+            )
+            return None
+
+        logging.info(
+            f"AOT compilation succeeded for {benchmark['name']} with runtime {runtime['name']}"
+        )
+        return precompiled_path
+
+    return None
 
 
 def _save_results_to_file(results, folder="results"):
@@ -294,11 +315,14 @@ def main(args):
 
             results[r["name"]][b["name"]] = []
 
-            # TODO: optimize repeat with AOT, should be compiled only once
+            precompiled_path = None
+            if r["aot-command"]:
+                precompiled_path = _compile_benchmark(b, r, args.benchmarks_folder)
+
             for i in range(args.repeat):
                 logging.info(f"Running iteration {i + 1}/{args.repeat}")
                 elapsed_time, score, return_code, output = _run_benchmark_with_runtime(
-                    b, r, args.benchmarks_folder
+                    b, r, args.benchmarks_folder, precompiled_path
                 )
 
                 logging.info(f"Elapsed time: {elapsed_time} ns")
@@ -322,6 +346,11 @@ def main(args):
                         **({"output": output} if not args.no_store_output else {}),
                     }
                 )
+
+            # Cleanup precompiled file after all iterations
+            if precompiled_path and os.path.exists(precompiled_path):
+                os.remove(precompiled_path)
+                logging.debug(f"Removed precompiled file: {precompiled_path}")
 
     logging.debug(f"Results: {results}")
 
