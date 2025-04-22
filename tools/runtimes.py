@@ -310,6 +310,10 @@ def _execute_runtime_command(runtime, command_key, runtimes_folder="runtimes"):
     """
     logging.info(f"Executing {command_key} for {runtime['name']}...")
 
+    if not os.path.exists(runtimes_folder):
+        os.makedirs(runtimes_folder)
+        logging.debug(f"Created {runtimes_folder} folder.")
+
     process = os.popen(f"cd {runtimes_folder} &&" + runtime[command_key])
     output = process.read()
 
