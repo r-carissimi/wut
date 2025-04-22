@@ -208,11 +208,19 @@ def _run_benchmark_with_runtime(
         f"Output validation succeeded for benchmark {benchmark['name']} with runtime {runtime['name']}"
     )
 
-    score = 0
-    if benchmark.get("score-parser"):
-        score = _parse_score(output, benchmark["score-parser"])
+    score = (
+        _parse_score(output, benchmark.get("score-parser"))
+        if benchmark.get("score-parser")
+        else 0
+    )
 
-    return elapsed_time, score, return_code, output
+    stats = {
+        stat_name: match.group(stat_name)
+        for stat_name, stat_regex in (runtime.get("stats-parser") or {}).items()
+        if (match := re.search(stat_regex, output))
+    }
+
+    return elapsed_time, score, return_code, output, stats
 
 
 def _compile_benchmark(benchmark, runtime, benchmarks_folder):
@@ -286,6 +294,7 @@ def main(args):
             "name": runtime["name"],
             "command": runtime["command"],
             "aot-command": runtime.get("aot-command", ""),
+            "stats-parser": runtime.get("stats-parser", {}),
         }
         for runtime in runtimes_list
         for runtime in ([runtime] + runtime.pop("subruntimes", []))
@@ -333,8 +342,10 @@ def main(args):
 
             for i in range(args.repeat):
                 logging.info(f"Running iteration {i + 1}/{args.repeat}")
-                elapsed_time, score, return_code, output = _run_benchmark_with_runtime(
-                    b, r, args.benchmarks_folder, precompiled_path
+                elapsed_time, score, return_code, output, stats = (
+                    _run_benchmark_with_runtime(
+                        b, r, args.benchmarks_folder, precompiled_path
+                    )
                 )
 
                 logging.info(f"Elapsed time: {elapsed_time} ns")
@@ -347,6 +358,7 @@ def main(args):
                     elapsed_time = 0
                     score = 0
 
+                logging.debug(f"Stats: {stats}")
                 logging.debug(f"Storing output is disabled: {args.no_store_output}")
 
                 # Output is stored unless the user specified not to
@@ -356,6 +368,7 @@ def main(args):
                         "score": score,
                         "return_code": return_code,
                         **({"output": output} if not args.no_store_output else {}),
+                        **({"stats": stats} if stats else {}),
                     }
                 )
 

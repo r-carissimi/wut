@@ -2,20 +2,42 @@
 	"name": "wasmedge",
 	"desc": "A CNCF extensible WebAssembly runtime.",
 	"version-command": "wasmedge/bin/wasmedge --version",
-	"command": "wasmedge/bin/wasmedge",
+	"command": "wasmedge/bin/wasmedge --enable-all --enable-all-statistics",
 	"install-command": "curl -sSf https://raw.githubusercontent.com/WasmEdge/WasmEdge/master/utils/install.sh | bash -s -- -p wasmedge",
 	"install-dir": "wasmedge",
 	"update-command": "curl -sSf https://raw.githubusercontent.com/WasmEdge/WasmEdge/master/utils/install.sh | bash -s -- -p wasmedge",
+	"stats-parser": {
+		"execution_time_ns": "Total execution time:\\s*(?P<execution_time_ns>[0-9]+)\\s*ns",
+		"wasm_time_ns": "Wasm instructions execution time:\\s*(?P<wasm_time_ns>[0-9]+)\\s*ns",
+		"host_time_ns": "Host functions execution time:\\s*(?P<host_time_ns>[0-9]+)\\s*ns",
+		"instructions_count": "Executed wasm instructions count:\\s*(?P<instructions_count>[0-9]+)"
+	},
 	"subruntimes": [
 		{
 			"name": "wasmedge-int",
-			"command": "wasmedge/bin/wasmedge --force-interpreter",
-			"desc": "WasmEdge with interpreter backend."
+			"command": "wasmedge/bin/wasmedge --enable-all --enable-all-statistics --force-interpreter",
+			"desc": "WasmEdge with interpreter backend.",
+			"stats-parser": {
+				"execution_time_ns": "Total execution time:\\s*(?P<execution_time_ns>[0-9]+)\\s*ns",
+				"wasm_time_ns": "Wasm instructions execution time:\\s*(?P<wasm_time_ns>[0-9]+)\\s*ns",
+				"host_time_ns": "Host functions execution time:\\s*(?P<host_time_ns>[0-9]+)\\s*ns",
+				"instructions_count": "Executed wasm instructions count:\\s*(?P<instructions_count>[0-9]+)"
+			}
 		},
 		{
 			"name": "wasmedge-jit",
-			"command": "wasmedge/bin/wasmedge --enable-jit",
-			"desc": "WasmEdge with JIT backend."
+			"command": "wasmedge/bin/wasmedge --enable-all --enable-all-statistics --enable-jit",
+			"desc": "WasmEdge with JIT backend.",
+			"stats-parser": {
+				"compile_start_timestamp": "\\[(?P<compile_start_timestamp>[0-9\\-:.\\s]+)\\]\\s*\\[info\\]\\s*compile start",
+				"verify_start_timestamp": "\\[(?P<verify_start_timestamp>[0-9\\-:.\\s]+)\\]\\s*\\[info\\]\\s*verify start",
+				"optimize_start_timestamp": "\\[(?P<optimize_start_timestamp>[0-9\\-:.\\s]+)\\]\\s*\\[info\\]\\s*optimize start",
+				"optimize_done_timestamp": "\\[(?P<optimize_done_timestamp>[0-9\\-:.\\s]+)\\]\\s*\\[info\\]\\s*optimize done",
+				"execution_time_ns": "Total execution time:\\s*(?P<execution_time_ns>[0-9]+)\\s*ns",
+				"wasm_time_ns": "Wasm instructions execution time:\\s*(?P<wasm_time_ns>[0-9]+)\\s*ns",
+				"host_time_ns": "Host functions execution time:\\s*(?P<host_time_ns>[0-9]+)\\s*ns",
+				"instructions_count": "Executed wasm instructions count:\\s*(?P<instructions_count>[0-9]+)"	
+			}
 		}
 	]
 }
