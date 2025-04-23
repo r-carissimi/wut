@@ -203,7 +203,7 @@ def _run_benchmark_with_runtime(
         logging.warning(
             f"Output validation failed for benchmark {benchmark['name']} with runtime {runtime['name']}"
         )
-        return 0, 0, return_code, output
+        return 0, 0, return_code, output, {}
     logging.debug(
         f"Output validation succeeded for benchmark {benchmark['name']} with runtime {runtime['name']}"
     )
@@ -305,12 +305,17 @@ def main(args):
 
     # If path to the runtimes is not absolute, prepend the path to the runtimes folder
     for r in runtimes_list:
-        for key in ["command", "aot-command"]:
-            if r.get(key) and not os.path.isabs(r[key]):
-                r[key] = os.path.join(
-                    os.path.dirname(os.path.abspath(args.runtimes_file)),
-                    r[key],
-                )
+        if "command" in r and not os.path.isabs(r["command"]):
+            r["command"] = os.path.join(
+                os.path.dirname(os.path.abspath(args.runtimes_file)),
+                r["command"],
+            )
+
+    for r in runtimes_list:
+        if "aot-command" in r:
+            r["aot-command"] = (
+                f"cd {os.path.dirname(os.path.abspath(args.runtimes_file))} && {r['aot-command']}"
+            )
 
     logging.debug(f"Using runtimes: {[r['name'] for r in runtimes_list]}")
 
