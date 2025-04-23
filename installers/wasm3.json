@@ -1,0 +1,8 @@
+{
+    "name": "wasm3",
+    "install-command": "git clone --depth 1 --recursive https://github.com/wasm3/wasm3 && cd wasm3 && mkdir build && cd build && cmake .. -DCMAKE_POLICY_VERSION_MINIMUM=3.5 && make",
+    "desc": "A fast WebAssembly interpreter and the most universal WASM runtime.",
+	"install-dir": "wasm3",
+	"version-command": "wasm3/build/wasm3 --version",
+	"command": "wasm3/build/wasm3"
+}
