@@ -1,7 +1,7 @@
 {
 	"name": "wizard",
 	"desc": "A fully-featured WebAssembly engine designed for teaching and research.",
-	"install-command": "mkdir wizard && cd wizard && git clone https://github.com/titzer/virgil.git && cd virgil && export PATH=$PATH:`pwd`/bin && make && cd .. && git clone https://github.com/titzer/wizard-engine.git && cd wizard-engine && make -j && cp bin/wizeng.x86-64-linux bin/wizeng || cp bin/wizeng.x86-linux bin/wizeng || cp bin/wizeng.x86-darwin bin/wizeng || for f in bin/wizeng*; do case \"$f\" in bin/wizeng.jvm*);; *) cp \"$f\" bin/wizeng && break;; esac; done",
+	"install-command": "mkdir wizard && cd wizard && git clone --depth 1 https://github.com/titzer/virgil.git && cd virgil && export PATH=$PATH:`pwd`/bin && make && cd .. && git clone --depth 1 https://github.com/titzer/wizard-engine.git && cd wizard-engine && make -j && cp bin/wizeng.x86-64-linux bin/wizeng || cp bin/wizeng.x86-linux bin/wizeng || cp bin/wizeng.x86-darwin bin/wizeng || for f in bin/wizeng*; do case \"$f\" in bin/wizeng.jvm*);; *) cp \"$f\" bin/wizeng && break;; esac; done",
 	"install-dir": "wizard",
 	"version-command": "wizard/wizard-engine/bin/wizeng --version --help",
 	"update-command": "cd wizard/virgil && git pull && export PATH=$PATH:`pwd`/bin && make clean && make && cd ../wizard-engine && git pull && make clean && ls -hal && make -j && cp bin/wizeng.x86-64-linux bin/wizeng || cp bin/wizeng.x86-linux bin/wizeng || cp bin/wizeng.x86-darwin bin/wizeng || for f in bin/wizeng*; do case \"$f\" in bin/wizeng.jvm*);; *) cp \"$f\" bin/wizeng && break;; esac; done",

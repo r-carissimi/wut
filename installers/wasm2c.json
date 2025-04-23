@@ -1,6 +1,6 @@
 {
     "name": "wasm2c",
-    "install-command": "git clone --recursive https://github.com/WebAssembly/wabt && cd wabt && mkdir build && cd build && cmake .. && cmake --build .",
+    "install-command": "git clone --depth 1 --recursive https://github.com/WebAssembly/wabt && cd wabt && mkdir build && cd build && cmake .. && cmake --build .",
     "desc": "A tool to convert WebAssembly binary files to C. Does not support WASI.",
 	"install-dir": "wabt",
 	"version-command": "wabt/build/wasm2c --version",
