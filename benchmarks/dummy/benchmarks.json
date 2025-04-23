@@ -1,0 +1,8 @@
+{
+	"benchmarks": [
+		{
+			"name": "dummy",
+			"path": "dummy.wasm"
+		}
+	]
+}
