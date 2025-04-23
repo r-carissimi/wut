@@ -305,7 +305,7 @@ def main(args):
 
     # If path to the runtimes is not absolute, prepend the path to the runtimes folder
     for r in runtimes_list:
-        if "command" in r and not os.path.isabs(r["command"]):
+        if r["command"].strip() and not os.path.isabs(r["command"].strip()):
             r["command"] = os.path.join(
                 os.path.dirname(os.path.abspath(args.runtimes_file)),
                 r["command"],
