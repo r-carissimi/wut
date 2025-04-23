@@ -312,7 +312,7 @@ def main(args):
             )
 
     for r in runtimes_list:
-        if "aot-command" in r:
+        if "aot-command" in r and r["aot-command"].strip():
             r["aot-command"] = (
                 f"cd {os.path.dirname(os.path.abspath(args.runtimes_file))} && {r['aot-command']}"
             )
