@@ -1,9 +1,17 @@
 {
 	"name": "wasmtime",
-	"install-command": "curl https://wasmtime.dev/install.sh -sSf | HOME=$(mktemp -d) WASMTIME_HOME='wasmtime' bash",
+	"install-command": "curl https://wasmtime.dev/install.sh -sSf | PROFILE=$(mktemp) WASMTIME_HOME='wasmtime' bash",
 	"desc": "Wasmtime is a standalone JIT-style runtime for WebAssembly",
 	"install-dir": "wasmtime",
-	"update-command": "curl https://wasmtime.dev/install.sh -sSf | HOME=$(mktemp -d) WASMTIME_HOME='wasmtime' bash",
+	"update-command": "curl https://wasmtime.dev/install.sh -sSf | PROFILE=$(mktemp) WASMTIME_HOME='wasmtime' bash",
 	"version-command": "wasmtime/bin/wasmtime -V",
-	"command": "wasmtime/bin/wasmtime"
+	"command": "wasmtime/bin/wasmtime",
+	"subruntimes": [
+		{
+			"name": "wasmtime-aot",
+			"command": "wasmtime/bin/wasmtime --allow-precompiled",
+			"desc": "Wasmtime with AOT",
+			"aot-command": "wasmtime/bin/wasmtime compile -o {output} {input}"
+		}
+	]
 }

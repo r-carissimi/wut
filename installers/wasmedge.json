@@ -38,6 +38,18 @@
 				"host_time_ns": "Host functions execution time:\\s*(?P<host_time_ns>[0-9]+)\\s*ns",
 				"instructions_count": "Executed wasm instructions count:\\s*(?P<instructions_count>[0-9]+)"	
 			}
+		},
+		{
+			"name": "wasmedge-aot",
+			"command": "wasmedge/bin/wasmedge --enable-all --enable-all-statistics",
+			"desc": "WasmEdge with AOT",
+			"aot-command": "wasmedge/bin/wasmedge compile {input} {output}",
+			"stats-parser": {
+				"execution_time_ns": "Total execution time:\\s*(?P<execution_time_ns>[0-9]+)\\s*ns",
+				"wasm_time_ns": "Wasm instructions execution time:\\s*(?P<wasm_time_ns>[0-9]+)\\s*ns",
+				"host_time_ns": "Host functions execution time:\\s*(?P<host_time_ns>[0-9]+)\\s*ns",
+				"instructions_count": "Executed wasm instructions count:\\s*(?P<instructions_count>[0-9]+)"
+			}
 		}
 	]
 }
