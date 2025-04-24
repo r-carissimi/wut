@@ -5,5 +5,5 @@
 	"install-dir": "wamr",
 	"version-command": "wamr/bin/iwasm --version",
 	"command": "wamr/bin/iwasm",
-	"update-command": "cd wamr && git pull && rm -rf bin && cd wamr/product-mini/platforms/$(uname -s | tr '[:upper:]' '[:lower:]') && rm -rf build && mkdir -p build && cd build && cmake .. && make && mkdir -p ../../../../bin && cp iwasm ../../../../bin/iwasm"
+	"update-command": "cd wamr && git pull && rm -rf bin && cd product-mini/platforms/$(uname -s | tr '[:upper:]' '[:lower:]') && rm -rf build && mkdir -p build && cd build && cmake .. && make && mkdir -p ../../../../bin && cp iwasm ../../../../bin/iwasm"
 }

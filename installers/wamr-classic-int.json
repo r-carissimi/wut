@@ -1,0 +1,9 @@
+{
+	"name": "wamr-classic-int",
+	"install-command": "git clone https://github.com/bytecodealliance/wasm-micro-runtime.git --depth 1 wamr-classic-int && cd wamr-classic-int/product-mini/platforms/$(uname -s | tr '[:upper:]' '[:lower:]') && mkdir -p build && cd build && cmake .. -DWAMR_BUILD_FAST_INTERP=0 && make && mkdir -p ../../../../bin && cp iwasm ../../../../bin/iwasm",
+	"desc": "WebAssembly Micro Runtime (WAMR) built with the Classic Interpreter",
+	"install-dir": "wamr-classic-int",
+	"version-command": "wamr-classic-int/bin/iwasm --version",
+	"command": "wamr-classic-int/bin/iwasm",
+	"update-command": "cd wamr-classic-int && git pull && rm -rf bin && cd product-mini/platforms/$(uname -s | tr '[:upper:]' '[:lower:]') && rm -rf build && mkdir -p build && cd build && cmake .. -DWAMR_BUILD_FAST_INTERP=0 && make && mkdir -p ../../../../bin && cp iwasm ../../../../bin/iwasm"
+}
