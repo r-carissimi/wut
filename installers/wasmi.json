@@ -1,0 +1,26 @@
+{
+	"name": "wasmi",
+	"desc": "Wasmi is a WebAssembly interpreter written in Rust",
+	"install-command": "mkdir wasmi && cd wasmi && export CARGO_HOME=$PWD/.cargo && export RUSTUP_HOME=$PWD/.rustup && curl https://sh.rustup.rs -sSf | sh -s -- -y --no-modify-path && source $CARGO_HOME/env && git clone --recursive https://github.com/wasmi-labs/wasmi.git src && cd src && cargo build --release",
+	"install-dir": "wasmi",
+	"update-command": "cd wasmi/src && git pull && source \"../.cargo/env\" && cargo build",
+	"command": "wasmi/src/target/release/wasmi_cli",
+	"version-command": "wasmi/src/target/release/wasmi_cli --version",
+	"subruntimes": [
+		{
+			"name": "wasmi-eager",
+			"command": "wasmi/src/target/release/wasmi_cli --compilation-mode eager",
+			"desc": "Wasmi with eager compilation mode"
+		},
+		{
+			"name": "wasmi-lazy-translation",
+			"command": "wasmi/src/target/release/wasmi_cli --compilation-mode lazy-translation",
+			"desc": "Wasmi with lazy-translation compilation mode"
+		},
+		{
+			"name": "wasmi-lazy",
+			"command": "wasmi/src/target/release/wasmi_cli --compilation-mode lazy",
+			"desc": "Wasmi with lazy compilation mode"
+		}
+	]
+}
