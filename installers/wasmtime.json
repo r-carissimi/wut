@@ -5,11 +5,11 @@
 	"install-dir": "wasmtime",
 	"update-command": "curl https://wasmtime.dev/install.sh -sSf | PROFILE=$(mktemp) WASMTIME_HOME='wasmtime' bash",
 	"version-command": "wasmtime/bin/wasmtime -V",
-	"command": "wasmtime/bin/wasmtime",
+	"command": "wasmtime/bin/wasmtime --invoke {entrypoint} {payload} {args}",
 	"subruntimes": [
 		{
 			"name": "wasmtime-aot",
-			"command": "wasmtime/bin/wasmtime --allow-precompiled",
+			"command": "wasmtime/bin/wasmtime --allow-precompiled --invoke {entrypoint} {payload} {args}",
 			"desc": "Wasmtime with AOT",
 			"aot-command": "wasmtime/bin/wasmtime compile -o {output} {input}"
 		}

@@ -184,10 +184,18 @@ def _run_benchmark_with_runtime(
     if precompiled_path:
         benchmark_path = precompiled_path
 
-    logging.debug(f"Running '{runtime['command']} {benchmark_path}'")
+    command = runtime["command"].format(
+        payload=benchmark_path,
+        entrypoint=benchmark.get("entrypoint", "_start")
+        if "{entrypoint}" in runtime["command"]
+        else "",
+        args=benchmark.get("args", "") if "{args}" in runtime["command"] else "",
+    )
+
+    logging.debug(f"Running '{command}'")
 
     start_time = time.perf_counter_ns()
-    process = os.popen(f"{runtime['command']} {benchmark_path}")
+    process = os.popen(f"{command}")
     output = process.read()
     end_time = time.perf_counter_ns()
     elapsed_time = end_time - start_time
@@ -305,7 +313,10 @@ def main(args):
 
     # If path to the runtimes is not absolute, prepend the path to the runtimes folder
     for r in runtimes_list:
-        if r["command"].strip() and not os.path.isabs(r["command"].strip()):
+        # A command can start with {payload} that is replaced with an absolute path later
+        if not r["command"].strip().startswith("{") and not os.path.isabs(
+            r["command"].strip()
+        ):
             r["command"] = os.path.join(
                 os.path.dirname(os.path.abspath(args.runtimes_file)),
                 r["command"],
@@ -344,6 +355,8 @@ def main(args):
             precompiled_path = None
             if r["aot-command"]:
                 precompiled_path = _compile_benchmark(b, r, args.benchmarks_folder)
+                if precompiled_path is None:
+                    continue
 
             for i in range(args.repeat):
                 logging.info(f"Running iteration {i + 1}/{args.repeat}")

@@ -4,6 +4,6 @@
     "desc": "A fast WebAssembly interpreter and the most universal WASM runtime.",
 	"install-dir": "wasm3",
 	"version-command": "wasm3/build/wasm3 --version",
-	"command": "wasm3/build/wasm3",
+	"command": "wasm3/build/wasm3 --func {entrypoint} {payload} {args}",
 	"update-command": "cd wasm3 && git pull && rm -rf build && mkdir build && cd build && cmake .. -DCMAKE_POLICY_VERSION_MINIMUM=3.5 && make"
 }

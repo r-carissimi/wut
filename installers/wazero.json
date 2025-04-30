@@ -5,11 +5,11 @@
 	"install-dir": "wazero",
 	"update-command": "rm -rf wazero && mkdir wazero && cd wazero && curl https://wazero.io/install.sh -sSf| sh",
 	"version-command": "wazero/bin/wazero version",
-	"command": "wazero/bin/wazero run",
+	"command": "wazero/bin/wazero run {payload} {args}",
 	"subruntimes": [
 		{
 			"name": "wazero-interpreter",
-			"command": "wazero/bin/wazero run -interpreter",
+			"command": "wazero/bin/wazero run -interpreter {payload} {args}",
 			"desc": "Wazero with interpreter backend"
 		}
 	]
