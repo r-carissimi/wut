@@ -1,0 +1,364 @@
+{
+    "benchmarks": [
+        {
+            "name": "aead-chacha20poly1305",
+            "path": "aead_chacha20poly1305.wasm",
+			"score-parser": "(?P<score>\\d+)"
+        },
+        {
+            "name": "aead-chacha20poly13052",
+            "path": "aead_chacha20poly13052.wasm",
+			"score-parser": "(?P<score>\\d+)"
+        },
+        {
+            "name": "aead-xchacha20poly1305",
+            "path": "aead_xchacha20poly1305.wasm",
+			"score-parser": "(?P<score>\\d+)"
+        },
+        {
+            "name": "auth",
+            "path": "auth.wasm",
+			"score-parser": "(?P<score>\\d+)"
+        },
+        {
+            "name": "auth2",
+            "path": "auth2.wasm",
+			"score-parser": "(?P<score>\\d+)"
+        },
+        {
+            "name": "auth3",
+            "path": "auth3.wasm",
+			"score-parser": "(?P<score>\\d+)"
+        },
+        {
+            "name": "auth6",
+            "path": "auth6.wasm",
+			"score-parser": "(?P<score>\\d+)"
+        },
+        {
+            "name": "box",
+            "path": "box.wasm",
+			"score-parser": "(?P<score>\\d+)"
+        },
+        {
+            "name": "box2",
+            "path": "box2.wasm",
+			"score-parser": "(?P<score>\\d+)"
+        },
+        {
+            "name": "box-easy",
+            "path": "box_easy.wasm",
+			"score-parser": "(?P<score>\\d+)"
+        },
+        {
+            "name": "box-seal",
+            "path": "box_seal.wasm",
+			"score-parser": "(?P<score>\\d+)"
+        },
+        {
+            "name": "box-seed",
+            "path": "box_seed.wasm",
+			"score-parser": "(?P<score>\\d+)"
+        },
+        {
+            "name": "chacha20",
+            "path": "chacha20.wasm",
+			"score-parser": "(?P<score>\\d+)"
+        },
+        {
+            "name": "codecs",
+            "path": "codecs.wasm",
+			"score-parser": "(?P<score>\\d+)"
+        },
+        {
+            "name": "generichash",
+            "path": "generichash.wasm",
+			"score-parser": "(?P<score>\\d+)"
+        },
+        {
+            "name": "generichash2",
+            "path": "generichash2.wasm",
+			"score-parser": "(?P<score>\\d+)"
+        },
+        {
+            "name": "generichash3",
+            "path": "generichash3.wasm",
+			"score-parser": "(?P<score>\\d+)"
+        },
+        {
+            "name": "hash",
+            "path": "hash.wasm",
+			"score-parser": "(?P<score>\\d+)"
+        },
+        {
+            "name": "hash3",
+            "path": "hash3.wasm",
+			"score-parser": "(?P<score>\\d+)"
+        },
+        {
+            "name": "kdf",
+            "path": "kdf.wasm",
+			"score-parser": "(?P<score>\\d+)"
+        },
+        {
+            "name": "keygen",
+            "path": "keygen.wasm",
+			"score-parser": "(?P<score>\\d+)"
+        },
+        {
+            "name": "onetimeauth",
+            "path": "onetimeauth.wasm",
+			"score-parser": "(?P<score>\\d+)"
+        },
+        {
+            "name": "onetimeauth2",
+            "path": "onetimeauth2.wasm",
+			"score-parser": "(?P<score>\\d+)"
+        },
+        {
+            "name": "randombytes",
+            "path": "randombytes.wasm",
+			"score-parser": "(?P<score>\\d+)"
+        },
+        {
+            "name": "scalarmult",
+            "path": "scalarmult.wasm",
+			"score-parser": "(?P<score>\\d+)"
+        },
+        {
+            "name": "scalarmult2",
+            "path": "scalarmult2.wasm",
+			"score-parser": "(?P<score>\\d+)"
+        },
+        {
+            "name": "scalarmult5",
+            "path": "scalarmult5.wasm",
+			"score-parser": "(?P<score>\\d+)"
+        },
+        {
+            "name": "scalarmult6",
+            "path": "scalarmult6.wasm",
+			"score-parser": "(?P<score>\\d+)"
+        },
+        {
+            "name": "scalarmult7",
+            "path": "scalarmult7.wasm",
+			"score-parser": "(?P<score>\\d+)"
+        },
+        {
+            "name": "secretbox",
+            "path": "secretbox.wasm",
+			"score-parser": "(?P<score>\\d+)"
+        },
+        {
+            "name": "secretbox2",
+            "path": "secretbox2.wasm",
+			"score-parser": "(?P<score>\\d+)"
+        },
+        {
+            "name": "secretbox_easy",
+            "path": "secretbox_easy.wasm",
+			"score-parser": "(?P<score>\\d+)"
+        },
+        {
+            "name": "shorthash",
+            "path": "shorthash.wasm",
+			"score-parser": "(?P<score>\\d+)"
+        },
+        {
+            "name": "siphashx24",
+            "path": "siphashx24.wasm",
+			"score-parser": "(?P<score>\\d+)"
+        },
+        {
+            "name": "stream3",
+            "path": "stream3.wasm",
+			"score-parser": "(?P<score>\\d+)"
+        },
+        {
+            "name": "stream4",
+            "path": "stream4.wasm",
+			"score-parser": "(?P<score>\\d+)"
+        },
+		{
+            "name": "auth5",
+            "path": "auth5.wasm",
+            "score-parser": "(?P<score>\\d+)"
+        },
+        {
+            "name": "auth7",
+            "path": "auth7.wasm",
+            "score-parser": "(?P<score>\\d+)"
+        },
+        {
+            "name": "box7",
+            "path": "box7.wasm",
+            "score-parser": "(?P<score>\\d+)"
+        },
+        {
+            "name": "box8",
+            "path": "box8.wasm",
+            "score-parser": "(?P<score>\\d+)"
+        },
+        {
+            "name": "box-easy2",
+            "path": "box_easy2.wasm",
+            "score-parser": "(?P<score>\\d+)"
+        },
+        {
+            "name": "core1",
+            "path": "core1.wasm",
+            "score-parser": "(?P<score>\\d+)"
+        },
+        {
+            "name": "core2",
+            "path": "core2.wasm",
+            "score-parser": "(?P<score>\\d+)"
+        },
+        {
+            "name": "core3",
+            "path": "core3.wasm",
+            "score-parser": "(?P<score>\\d+)"
+        },
+        {
+            "name": "core4",
+            "path": "core4.wasm",
+            "score-parser": "(?P<score>\\d+)"
+        },
+        {
+            "name": "core5",
+            "path": "core5.wasm",
+            "score-parser": "(?P<score>\\d+)"
+        },
+        {
+            "name": "core6",
+            "path": "core6.wasm",
+            "score-parser": "(?P<score>\\d+)"
+        },
+        {
+            "name": "core-ed25519",
+            "path": "core_ed25519.wasm",
+            "score-parser": "(?P<score>\\d+)"
+        },
+        {
+            "name": "core-ristretto255",
+            "path": "core_ristretto255.wasm",
+            "score-parser": "(?P<score>\\d+)"
+        },
+        {
+            "name": "ed25519-convert",
+            "path": "ed25519_convert.wasm",
+            "score-parser": "(?P<score>\\d+)"
+        },
+        {
+            "name": "kx",
+            "path": "kx.wasm",
+            "score-parser": "(?P<score>\\d+)"
+        },
+        {
+            "name": "metamorphic",
+            "path": "metamorphic.wasm",
+            "score-parser": "(?P<score>\\d+)"
+        },
+        {
+            "name": "onetimeauth7",
+            "path": "onetimeauth7.wasm",
+            "score-parser": "(?P<score>\\d+)"
+        },
+        {
+            "name": "pwhash-argon2i",
+            "path": "pwhash_argon2i.wasm",
+            "score-parser": "(?P<score>\\d+)"
+        },
+        {
+            "name": "pwhash-argon2id",
+            "path": "pwhash_argon2id.wasm",
+            "score-parser": "(?P<score>\\d+)"
+        },
+        {
+            "name": "pwhash-scrypt",
+            "path": "pwhash_scrypt.wasm",
+            "score-parser": "(?P<score>\\d+)"
+        },
+        {
+            "name": "pwhash-scrypt-ll",
+            "path": "pwhash_scrypt_ll.wasm",
+            "score-parser": "(?P<score>\\d+)"
+        },
+        {
+            "name": "scalarmult8",
+            "path": "scalarmult8.wasm",
+            "score-parser": "(?P<score>\\d+)"
+        },
+        {
+            "name": "scalarmult-ed25519",
+            "path": "scalarmult_ed25519.wasm",
+            "score-parser": "(?P<score>\\d+)"
+        },
+        {
+            "name": "scalarmult-ristretto255",
+            "path": "scalarmult_ristretto255.wasm",
+            "score-parser": "(?P<score>\\d+)"
+        },
+        {
+            "name": "secretbox7",
+            "path": "secretbox7.wasm",
+            "score-parser": "(?P<score>\\d+)"
+        },
+        {
+            "name": "secretbox8",
+            "path": "secretbox8.wasm",
+            "score-parser": "(?P<score>\\d+)"
+        },
+        {
+            "name": "secretbox-easy2",
+            "path": "secretbox_easy2.wasm",
+            "score-parser": "(?P<score>\\d+)"
+        },
+        {
+            "name": "secretstream",
+            "path": "secretstream.wasm",
+            "score-parser": "(?P<score>\\d+)"
+        },
+        {
+            "name": "sodium-core",
+            "path": "sodium_core.wasm",
+            "score-parser": "(?P<score>\\d+)"
+        },
+        {
+            "name": "sodium-utils",
+            "path": "sodium_utils.wasm",
+            "score-parser": "(?P<score>\\d+)"
+        },
+        {
+            "name": "sodium-utils2",
+            "path": "sodium_utils2.wasm",
+            "score-parser": "(?P<score>\\d+)"
+        },
+        {
+            "name": "sodium-utils3",
+            "path": "sodium_utils3.wasm",
+            "score-parser": "(?P<score>\\d+)"
+        },
+        {
+            "name": "stream",
+            "path": "stream.wasm",
+            "score-parser": "(?P<score>\\d+)"
+        },
+        {
+            "name": "stream2",
+            "path": "stream2.wasm",
+            "score-parser": "(?P<score>\\d+)"
+        },
+        {
+            "name": "verify1",
+            "path": "verify1.wasm",
+            "score-parser": "(?P<score>\\d+)"
+        },
+        {
+            "name": "xchacha20",
+            "path": "xchacha20.wasm",
+            "score-parser": "(?P<score>\\d+)"
+        }
+    ]
+}
