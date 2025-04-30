@@ -1,0 +1,28 @@
+{
+	"benchmarks": [
+		{
+			"name": "kotlin-prime-1K",
+			"path": "kotlin-prime-1K.wasm",
+			"entrypoint": "dummy",
+			"output-validator": "Found 168 prime numbers up to 1000"
+		},
+		{
+			"name": "kotlin-prime-10K",
+			"path": "kotlin-prime-10K.wasm",
+			"entrypoint": "dummy",
+			"output-validator": "Found 1229 prime numbers up to 10000"
+		},
+		{
+			"name": "kotlin-prime-100K",
+			"path": "kotlin-prime-100K.wasm",
+			"entrypoint": "dummy",
+			"output-validator": "Found 9592 prime numbers up to 100000"
+		},
+		{
+			"name": "kotlin-prime-1M",
+			"path": "kotlin-prime-1M.wasm",
+			"entrypoint": "dummy",
+			"output-validator": "Found 78498 prime numbers up to 1000000"
+		}
+	]
+}
