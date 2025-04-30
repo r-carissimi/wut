@@ -2,7 +2,7 @@
 	"name": "wasmedge",
 	"desc": "A CNCF extensible WebAssembly runtime.",
 	"version-command": "wasmedge/bin/wasmedge --version",
-	"command": "wasmedge/bin/wasmedge --enable-all --enable-all-statistics {payload} {entrypoint} {args}",
+	"command": "wasmedge/bin/wasmedge --reactor --enable-all --enable-all-statistics {payload} {entrypoint} {args}",
 	"install-command": "curl -sSf https://raw.githubusercontent.com/WasmEdge/WasmEdge/master/utils/install.sh | bash -s -- -p wasmedge",
 	"install-dir": "wasmedge",
 	"update-command": "curl -sSf https://raw.githubusercontent.com/WasmEdge/WasmEdge/master/utils/install.sh | bash -s -- -p wasmedge",
@@ -15,7 +15,7 @@
 	"subruntimes": [
 		{
 			"name": "wasmedge-int",
-			"command": "wasmedge/bin/wasmedge --enable-all --enable-all-statistics --force-interpreter {payload} {entrypoint} {args}",
+			"command": "wasmedge/bin/wasmedge --reactor --enable-all --enable-all-statistics --force-interpreter {payload} {entrypoint} {args}",
 			"desc": "WasmEdge with interpreter backend.",
 			"stats-parser": {
 				"execution_time_ns": "Total execution time:\\s*(?P<execution_time_ns>[0-9]+)\\s*ns",
@@ -26,7 +26,7 @@
 		},
 		{
 			"name": "wasmedge-jit",
-			"command": "wasmedge/bin/wasmedge --enable-all --enable-all-statistics --enable-jit {payload} {entrypoint} {args}",
+			"command": "wasmedge/bin/wasmedge --reactor --enable-all --enable-all-statistics --enable-jit {payload} {entrypoint} {args}",
 			"desc": "WasmEdge with JIT backend.",
 			"stats-parser": {
 				"compile_start_timestamp": "\\[(?P<compile_start_timestamp>[0-9\\-:.\\s]+)\\]\\s*\\[info\\]\\s*compile start",
@@ -41,7 +41,7 @@
 		},
 		{
 			"name": "wasmedge-aot",
-			"command": "wasmedge/bin/wasmedge --enable-all --enable-all-statistics {payload} {entrypoint} {args}",
+			"command": "wasmedge/bin/wasmedge --reactor --enable-all --enable-all-statistics {payload} {entrypoint} {args}",
 			"desc": "WasmEdge with AOT",
 			"aot-command": "wasmedge/bin/wasmedge compile --enable-all {input} {output}",
 			"stats-parser": {
