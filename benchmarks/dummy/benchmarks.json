@@ -3,6 +3,12 @@
 		{
 			"name": "dummy",
 			"path": "dummy.wasm"
+		},
+		{
+			"name": "param",
+			"path": "param.wasm",
+			"entrypoint": "wait",
+			"args": "50"
 		}
 	]
 }
