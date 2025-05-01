@@ -1,0 +1,92 @@
+{
+    "benchmarks": [
+        {
+            "name": "basicmath-small",
+            "path": "basicmath_small.wasm",
+			"output-validator": "6.283185307180 radians = 360 degrees"
+        },
+        {
+            "name": "basicmath-large",
+            "path": "basicmath_large.wasm",
+			"output-validator": "6.283185307180 radians = 360 degrees"
+        },
+        {
+            "name": "bitcnts-small",
+            "path": "bitcnts.wasm",
+			"args": "7500",
+			"output-validator": "Bits: 61053"
+        },
+		{
+            "name": "bitcnts-large",
+            "path": "bitcnts.wasm",
+			"args": "1125000",
+			"output-validator": "Bits: 13244091"
+        },
+        {
+            "name": "crc-small",
+            "path": "crc.wasm",
+			"args": "{path}/assets/small.pcm",
+			"output-validator": "6DA5B639 1368864"
+        },
+		{
+            "name": "crc-large",
+            "path": "crc.wasm",
+			"args": "{path}/assets/large.pcm",
+			"output-validator": "DC8B7C2A 26611200"
+		},
+        {
+            "name": "dijkstra-large",
+            "path": "dijkstra_large.wasm",
+			"args": "{path}/assets/input.dat",
+			"output-validator": "Shortest path is 3 in cost. Path is:  99 3 21 70 55 12 37 63 72 46 10 58 33 13 97 49"
+        },
+        {
+            "name": "dijkstra-small",
+            "path": "dijkstra_small.wasm",
+			"args": "{path}/assets/input.dat",
+			"output-validator": "Shortest path is 2 in cost. Path is:  19 69"
+        },
+        {
+            "name": "fft-small",
+            "path": "fft.wasm",
+			"args": "4 4096",
+			"output-validator": "3023.767334 \t3642.202393"
+        },
+		{
+			"name": "fft-large",
+			"path": "fft.wasm",
+			"args": "8 32768",
+			"output-validator": "-1113.624146 \t34432.714844"
+		},
+        {
+            "name": "rawcaudio-small",
+            "path": "rawcaudio.wasm",
+			"args": "< {path}/assets/small.pcm > /dev/null"
+        },
+		{
+            "name": "rawcaudio-large",
+            "path": "rawcaudio.wasm",
+			"args": "< {path}/assets/large.pcm > /dev/null"
+        },
+        {
+            "name": "rawdaudio-small",
+            "path": "rawdaudio.wasm",
+			"args": "< {path}/assets/small.adpcm > /dev/null"
+        },
+		{
+            "name": "rawdaudio-large",
+            "path": "rawdaudio.wasm",
+			"args": "< {path}/assets/large.adpcm > /dev/null"
+        },
+        {
+            "name": "search-large",
+            "path": "search_large.wasm",
+			"output-validator": "\"more\" is in \"and recycling it for more than its\""
+        },
+        {
+            "name": "search-small",
+            "path": "search_small.wasm",
+			"output-validator": "\"principalities\" is not in \"principles.\""
+        }
+    ]
+}
