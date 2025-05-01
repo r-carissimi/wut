@@ -184,12 +184,26 @@ def _run_benchmark_with_runtime(
     if precompiled_path:
         benchmark_path = precompiled_path
 
+    # Replaces the path in the arguments with the absolute path to the benchmark
+    # folder. This is due to some runtimes that do not support mapping
+    # directories to a different path in the WASM module. Hence, we need to
+    # provide the absolute path to the benchmark folder for the file to be
+    # accessible.
+    arguments = benchmark.get("args", "").format(path=os.path.dirname(benchmark_path))
+
+    # Command formatting
     command = runtime["command"].format(
         payload=benchmark_path,
-        entrypoint=benchmark.get("entrypoint", "_start")
+        entrypoint=benchmark.get("entrypoint", "")
         if "{entrypoint}" in runtime["command"]
         else "",
-        args=benchmark.get("args", "") if "{args}" in runtime["command"] else "",
+        entrypoint_flag=runtime["entrypoint-flag"]
+        if "{entrypoint_flag}" in runtime["command"] and "entrypoint" in benchmark
+        else "",
+        args=arguments if "{args}" in runtime["command"] else "",
+        mount_dir=os.path.dirname(benchmark_path)
+        if "{mount_dir}" in runtime["command"]
+        else "",
     )
 
     logging.debug(f"Running '{command}'")
@@ -303,6 +317,7 @@ def main(args):
             "command": runtime["command"],
             "aot-command": runtime.get("aot-command", ""),
             "stats-parser": runtime.get("stats-parser", {}),
+            "entrypoint-flag": runtime.get("entrypoint-flag", ""),
         }
         for runtime in runtimes_list
         for runtime in ([runtime] + runtime.pop("subruntimes", []))

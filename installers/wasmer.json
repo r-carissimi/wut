@@ -5,28 +5,33 @@
 	"install-dir": "wasmer",
 	"version-command": "wasmer/bin/wasmer --version",
 	"update-command": "wasmer/bin/wasmer self-update",
-	"command": "wasmer/bin/wasmer run --enable-all -i {entrypoint} {payload} {args}",
+	"command": "wasmer/bin/wasmer run --enable-all --dir {mount_dir} {entrypoint_flag} {entrypoint} {payload} {args}",
+    "entrypoint-flag": "-i",
 	"subruntimes": [
 		{
 			"name": "wasmer-llvm",
-			"command": "wasmer/bin/wasmer run --enable-all --llvm -i {entrypoint} {payload} {args}",
-			"desc": "Wasmer with LLVM backend."
+			"command": "wasmer/bin/wasmer run --enable-all --llvm --dir {mount_dir} {entrypoint_flag} {entrypoint} {payload} {args}",
+			"entrypoint-flag": "-i",
+            "desc": "Wasmer with LLVM backend."
 		},
 		{
 			"name": "wasmer-cranelift",
-			"command": "wasmer/bin/wasmer run --enable-all --cranelift -i {entrypoint} {payload} {args}",
-			"desc": "Wasmer with Cranelift backend."
+			"command": "wasmer/bin/wasmer run --enable-all --cranelift --dir {mount_dir} {entrypoint_flag} {entrypoint} {payload} {args}",
+			"entrypoint-flag": "-i",
+            "desc": "Wasmer with Cranelift backend."
 		},
 		{
 			"name": "wasmer-singlepass",
-			"command": "wasmer/bin/wasmer run --enable-all --singlepass -i {entrypoint} {payload} {args}",
-			"desc": "Wasmer with Singlepass backend."
+			"command": "wasmer/bin/wasmer run --enable-all --singlepass --dir {mount_dir} {entrypoint_flag} {entrypoint} {payload} {args}",
+			"entrypoint-flag": "-i",
+            "desc": "Wasmer with Singlepass backend."
 		},
 		{
 			"name": "wasmer-aot",
-			"command": "wasmer/bin/wasmer run --enable-all -i {entrypoint} {payload} {args}",
+			"command": "wasmer/bin/wasmer run --enable-all --dir {mount_dir} {entrypoint_flag} {entrypoint} {payload} {args}",
 			"desc": "Wasmer with AOT",
-			"aot-command": "wasmer/bin/wasmer compile -o {output} {input}"
+			"entrypoint-flag": "-i",
+            "aot-command": "wasmer/bin/wasmer compile -o {output} {input}"
 		}
 	]
 }
