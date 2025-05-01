@@ -1,0 +1,96 @@
+{
+    "benchmarks": [
+        {
+            "name": "boa",
+            "path": "boa.wasm"
+        },
+        {
+            "name": "commanderkeen",
+            "path": "commanderkeen.wasm"
+        },
+        {
+            "name": "ffmpeg",
+            "path": "ffmpeg.wasm"
+        },
+        {
+            "name": "fib",
+            "path": "fib.wasm"
+        },
+        {
+            "name": "figma-startpage",
+            "path": "figma-startpage.wasm"
+        },
+        {
+            "name": "funky-kart",
+            "path": "funky-kart.wasm"
+        },
+        {
+            "name": "game-of-life",
+            "path": "game-of-life.wasm"
+        },
+        {
+            "name": "guiicons",
+            "path": "guiicons.wasm"
+        },
+        {
+            "name": "handy-tools",
+            "path": "handy-tools.wasm"
+        },
+        {
+            "name": "heatmap",
+            "path": "heatmap.wasm"
+        },
+        {
+            "name": "jsc",
+            "path": "jsc.wasm"
+        },
+        {
+            "name": "kittygame",
+            "path": "kittygame.wasm"
+        },
+        {
+            "name": "multiplyDouble",
+            "path": "multiplyDouble.wasm"
+        },
+        {
+            "name": "multiplyInt",
+            "path": "multiplyInt.wasm"
+        },
+        {
+            "name": "ogv",
+            "path": "ogv.wasm"
+        },
+        {
+            "name": "pathfinding",
+            "path": "pathfinding.wasm"
+        },
+        {
+            "name": "riconpacker",
+            "path": "riconpacker.wasm"
+        },
+        {
+            "name": "rtexviewer",
+            "path": "rtexviewer.wasm"
+        },
+        {
+            "name": "sandspiel",
+            "path": "sandspiel.wasm"
+        },
+        {
+            "name": "sqlgui",
+            "path": "sqlgui.wasm"
+        },
+        {
+            "name": "uarm",
+            "path": "uarm.wasm"
+        },
+        {
+            "name": "video",
+            "path": "video.wasm"
+        },
+        {
+            "name": "visual6502remix",
+            "path": "visual6502remix.wasm"
+        }
+    ]
+}
