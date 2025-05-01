@@ -1,0 +1,48 @@
+{
+    "benchmarks": [
+        {
+            "name": "srad",
+            "path": "SRAD.wasm"
+        },
+        {
+            "name": "back-propagation",
+            "path": "back-propagation.wasm"
+        },
+        {
+            "name": "crc",
+            "path": "crc.wasm"
+        },
+        {
+            "name": "fft",
+            "path": "fft.wasm"
+        },
+        {
+            "name": "hmm",
+            "path": "hmm.wasm"
+        },
+        {
+            "name": "lavamd",
+            "path": "lavamd.wasm"
+        },
+        {
+            "name": "lud",
+            "path": "lud.wasm"
+        },
+        {
+            "name": "nqueens",
+            "path": "nqueens.wasm"
+        },
+        {
+            "name": "nw",
+            "path": "nw.wasm"
+        },
+        {
+            "name": "page-rank",
+            "path": "page-rank.wasm"
+        },
+        {
+            "name": "spmv",
+            "path": "spmv.wasm"
+        }
+    ]
+}
