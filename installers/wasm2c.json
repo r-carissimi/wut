@@ -5,5 +5,5 @@
 	"install-dir": "wabt",
 	"version-command": "wabt/build/wasm2c --version",
 	"command": "{payload} {args}",
-    "aot-command": "cd wabt/wasm2c && ../build/wasm2c --enable-exceptions --enable-threads --enable-tail-call --enable-memory64 --enable-multi-memory {input} -o temp.c && name=$(basename {input} .wasm | sed 's/-/_/g') && echo '#include <stdio.h>\\n#include <stdlib.h>\\n#include \"temp.h\"\\nint main(int argc, char** argv) {{\\n  wasm_rt_init();\\n  w2c_'$name' instance;\\n  wasm2c_'$name'_instantiate(&instance);\\n  wasm2c_'$name'_free(&instance);\\n  wasm_rt_free();\\n  return 0;\\n}}' > main.c && gcc main.c temp.c wasm-rt-impl.c wasm-rt-mem-impl.c -Iwasm2c -lm -o {output} && rm temp.c temp.h main.c"
+    "aot-command": "cd wabt/wasm2c && ../build/wasm2c --enable-exceptions --enable-threads --enable-tail-call --enable-memory64 --enable-multi-memory --module-name module {input} -o temp.c && echo '#include <stdio.h>\\n#include <stdlib.h>\\n#include \"temp.h\"\\nint main(int argc, char** argv) {{\\n  wasm_rt_init();\\n  w2c_module instance;\\n  wasm2c_module_instantiate(&instance);\\n  wasm2c_module_free(&instance);\\n  wasm_rt_free();\\n  return 0;\\n}}' > main.c && gcc main.c temp.c wasm-rt-impl.c wasm-rt-mem-impl.c -Iwasm2c -lm -o {output} && rm temp.c temp.h main.c"
 }
