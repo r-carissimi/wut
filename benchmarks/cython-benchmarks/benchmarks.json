@@ -1,0 +1,29 @@
+{
+	"benchmarks": [
+		{
+			"name": "meteor-contest",
+			"path": "meteor_contest.wasm",
+			"output-validator": "^.{1}\\."
+		},
+		{
+			"name": "nbody",
+			"path": "nbody.wasm",
+			"output-validator": "^.{1}\\."
+		},
+		{
+			"name": "nqueens",
+			"path": "nqueens.wasm",
+			"output-validator": "^.{1}\\."
+		},
+		{
+			"name": "richards",
+			"path": "richards.wasm",
+			"output-validator": "Average time per iteration"
+		},
+		{
+			"name": "spectralnorm",
+			"path": "spectralnorm.wasm",
+			"output-validator": "^.{1}\\."
+		}
+	]
+}
