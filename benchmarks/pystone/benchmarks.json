@@ -1,0 +1,10 @@
+{
+	"benchmarks": [
+		{
+			"name": "pystone",
+			"path": "pystone.wasm",
+			"output-validator": "This machine benchmarks at",
+			"score-parser": "This machine benchmarks at\\s+(?P<score>\\d+)\\s+pystones/second"
+		}
+	]
+}
