@@ -1,0 +1,9 @@
+{
+	"benchmarks": [
+		{
+			"name": "cpu-benchmark",
+			"path": "cpu-benchmark.wasm",
+			"output-validator": "Average"		
+		}
+	]
+}
