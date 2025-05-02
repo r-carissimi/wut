@@ -172,6 +172,7 @@ def _run_benchmark_with_runtime(
                * score: The score of the benchmark (if applicable)
                * return code: The return code of the benchmark
                * output: The output of the benchmark as a string
+               * stats: A dictionary containing the parsed stats from the output
     """
 
     benchmarks_folder = utils.get_absolute_path(benchmarks_folder)
@@ -209,7 +210,7 @@ def _run_benchmark_with_runtime(
     logging.debug(f"Running '{command}'")
 
     start_time = time.perf_counter_ns()
-    process = os.popen(f"{command}")
+    process = os.popen(command)
     output = process.read()
     end_time = time.perf_counter_ns()
     elapsed_time = end_time - start_time
