@@ -14,6 +14,12 @@
 			"entrypoint-flag": "--invoke",
 			"desc": "Wasmtime with AOT",
 			"aot-command": "wasmtime/bin/wasmtime compile -o {output} {input}"
+		},
+		{
+			"name": "wasmtime-pulley64",
+			"command": "wasmtime/bin/wasmtime --target pulley64 --dir {mount_dir} {entrypoint_flag} {entrypoint} {payload} {args}",
+			"entrypoint-flag": "--invoke",
+			"desc": "Wasmtime with Pulley bytecode interpreter for 64-bit architectures"
 		}
 	]
 }
