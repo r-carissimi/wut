@@ -271,7 +271,7 @@ def _compile_benchmark(benchmark, runtime, benchmarks_folder, runtimes_folder):
 
     if runtime["aot-command"]:
         aot_command = runtime["aot-command"].format(
-            input=benchmark_path, output=precompiled_path
+            input=f'"{benchmark_path}"', output=f'"{precompiled_path}"'
         )
         logging.debug(f"Running AOT command: '{aot_command}'")
         os.chdir(runtimes_folder)
