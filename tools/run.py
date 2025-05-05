@@ -155,7 +155,7 @@ def _parse_score(output, score_parser):
 
 
 def _run_benchmark_with_runtime(
-    benchmark, runtime, benchmarks_folder, precompiled_path=None
+    benchmark, runtime, benchmarks_folder, runtimes_folder, precompiled_path=None
 ):
     """Run a benchmark with a given runtime.
 
@@ -194,7 +194,7 @@ def _run_benchmark_with_runtime(
 
     # Command formatting
     command = runtime["command"].format(
-        payload=benchmark_path,
+        payload=f'"{benchmark_path}"',
         entrypoint=benchmark.get("entrypoint", "")
         if "{entrypoint}" in runtime["command"]
         else "",
@@ -202,12 +202,14 @@ def _run_benchmark_with_runtime(
         if "{entrypoint_flag}" in runtime["command"] and "entrypoint" in benchmark
         else "",
         args=arguments if "{args}" in runtime["command"] else "",
-        mount_dir=os.path.dirname(benchmark_path)
+        mount_dir=f'"{os.path.dirname(benchmark_path)}"'
         if "{mount_dir}" in runtime["command"]
         else "",
     )
 
     logging.debug(f"Running '{command}'")
+
+    os.chdir(runtimes_folder)
 
     start_time = time.perf_counter_ns()
     process = os.popen(command)
@@ -246,7 +248,7 @@ def _run_benchmark_with_runtime(
     return elapsed_time, score, return_code, output, stats
 
 
-def _compile_benchmark(benchmark, runtime, benchmarks_folder):
+def _compile_benchmark(benchmark, runtime, benchmarks_folder, runtimes_folder):
     """Compile a benchmark using AOT if applicable.
 
     Args:
@@ -272,6 +274,7 @@ def _compile_benchmark(benchmark, runtime, benchmarks_folder):
             input=benchmark_path, output=precompiled_path
         )
         logging.debug(f"Running AOT command: '{aot_command}'")
+        os.chdir(runtimes_folder)
         process = os.popen(aot_command)
         output = process.read()
         logging.debug(f"AOT output: {output}")
@@ -307,11 +310,13 @@ def main(args):
     args.runtimes_file = utils.get_absolute_path(args.runtimes_file)
     args.results_folder = utils.get_absolute_path(args.results_folder)
 
+    runtimes_folder = os.path.dirname(os.path.abspath(args.runtimes_file))
+
     # Get the runtime objects from the command line arguments
     runtimes_list = runtimes.list_runtimes(file=args.runtimes_file)
 
     # "all" means subruntimes as well. we need to bring them to the top level.
-    # Since we're at it, we'll also keep command and name only
+    # Since we're at it, we'll also select only the relevant fields
     runtimes_list = [
         {
             "name": runtime["name"],
@@ -326,23 +331,6 @@ def main(args):
 
     if "all" not in args.runtimes:
         runtimes_list = _filter_runtimes_by_name(args.runtimes, runtimes_list)
-
-    # If path to the runtimes is not absolute, prepend the path to the runtimes folder
-    for r in runtimes_list:
-        # A command can start with {payload} that is replaced with an absolute path later
-        if not r["command"].strip().startswith("{") and not os.path.isabs(
-            r["command"].strip()
-        ):
-            r["command"] = os.path.join(
-                os.path.dirname(os.path.abspath(args.runtimes_file)),
-                r["command"],
-            )
-
-    for r in runtimes_list:
-        if "aot-command" in r and r["aot-command"].strip():
-            r["aot-command"] = (
-                f"cd {os.path.dirname(os.path.abspath(args.runtimes_file))} && {r['aot-command']}"
-            )
 
     logging.debug(f"Using runtimes: {[r['name'] for r in runtimes_list]}")
 
@@ -370,7 +358,9 @@ def main(args):
 
             precompiled_path = None
             if r["aot-command"]:
-                precompiled_path = _compile_benchmark(b, r, args.benchmarks_folder)
+                precompiled_path = _compile_benchmark(
+                    b, r, args.benchmarks_folder, runtimes_folder
+                )
                 if precompiled_path is None:
                     continue
 
@@ -378,7 +368,7 @@ def main(args):
                 logging.info(f"Running iteration {i + 1}/{args.repeat}")
                 elapsed_time, score, return_code, output, stats = (
                     _run_benchmark_with_runtime(
-                        b, r, args.benchmarks_folder, precompiled_path
+                        b, r, args.benchmarks_folder, runtimes_folder, precompiled_path
                     )
                 )
 

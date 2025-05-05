@@ -314,7 +314,8 @@ def _execute_runtime_command(runtime, command_key, runtimes_folder="runtimes"):
         os.makedirs(runtimes_folder)
         logging.debug(f"Created {runtimes_folder} folder.")
 
-    process = os.popen(f"cd {runtimes_folder} &&" + runtime[command_key])
+    os.chdir(runtimes_folder)
+    process = os.popen(runtime[command_key])
     output = process.read()
 
     logging.info(f"{output}")
@@ -402,7 +403,8 @@ def _get_runtime_version(command, runtimes_folder="runtimes"):
         str: The version of the runtime. Returns None if the version could not be determined.
     """
 
-    process = os.popen(f"cd {runtimes_folder} && " + command)
+    os.chdir(runtimes_folder)
+    process = os.popen(command)
     output = process.read()
     exit_code = process.close() or 0
 
