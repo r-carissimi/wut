@@ -38,7 +38,7 @@ Add a new JSON object to the `runtimes` array. Each runtime object supports the 
 - command (**required**) → Command used to run a WebAssembly workload. It can be relative to the `runtimes` folder. It will be formatted using the following placeholders:
 
   - `{payload}` (**required**) → Path to the payload. It will be a quoted absolute path to a `.wasm` file.
-  - `{args}`  → Arguments to be passed to the payload, if the runtimes supports it.
+  - `{args}` → Arguments to be passed to the payload, if the runtimes supports it.
   - `{entrypoint}` → Function that needs to be called, if specified by the benchmark.
   - `{entrypoint_flag}` → Runtime flag to set an entrypoint. It's substituted from  `entrypoint-flag` in the runtime object when an entrypoint is specified in the benchmark.
   - `{mount_dir}` → Path benchmark directory so that it can be mounted using WASI.
