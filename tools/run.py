@@ -86,19 +86,55 @@ def _filter_runtimes_by_name(selected_runtimes, runtimes_list):
     return filtered_runtimes
 
 
-def _get_benchmarks_from_names(benchmarks_list, benchmarks_folder="benchmarks"):
+def _get_named_benchmarks(benchmarks_list, benchmarks_folder="benchmarks"):
     benchs = dict()
 
     for benchmark_name in benchmarks_list:
+        # Ignore benchmarks specified as files as they have already been loaded
+        if benchmark_name.endswith(".wasm"):
+            continue
         b = benchmarks.get_benchmark_from_name(benchmark_name, benchmarks_folder)
         if b is not None:
             for k, v in b.items():
+                # This creates a new list if the key does not exist
+                # and append the benchmark to the list. This is done to support
+                # specifying single benchmarks in a group.
                 benchs.setdefault(k, []).extend(v)
 
     return benchs
 
 
-def _get_benchmarks(benchmarks_list):
+def _load_benchmarks(benchmarks_list, benchmarks_folder):
+    """Load benchmarks from a list of names and files.
+
+    Args:
+        benchmarks (list): List of benchmark names or file paths.
+        benchmarks_folder (str): Path to the folder containing benchmark definitions.
+
+    Returns:
+        list: A list of benchmark dictionaries with their names and paths.
+    """
+
+    # Load benchmarks from files
+    file_benchmarks = [
+        {"name": os.path.basename(b), "path": os.path.abspath(b)}
+        for b in benchmarks_list
+        if b.endswith(".wasm") and os.path.isfile(b)
+    ]
+
+    logging.debug(f"File benchmarks: {file_benchmarks}")
+
+    # Load benchmarks from benchmark groups
+    named_benchmarks = (
+        benchmarks.list_benchmarks(benchmarks_folder)
+        if "all" in benchmarks_list
+        else _get_named_benchmarks(benchmarks_list, benchmarks_folder)
+    )
+
+    return _flatten_benchmarks(named_benchmarks) + file_benchmarks
+
+
+def _flatten_benchmarks(benchmarks_list):
     """This function takes a dict of benchmark groups and returns a list of
     benchmarks, without their group. It also adds the group name to the
     path of each benchmark, thus having the full path for each benchmark in the
@@ -334,15 +370,8 @@ def main(args):
 
     logging.debug(f"Using runtimes: {[r['name'] for r in runtimes_list]}")
 
-    # Get the benchmark objects from the command line arguments
-    benchmarks_list = args.benchmarks
-    if benchmarks_list == ["all"]:
-        benchmarks_list = benchmarks.list_benchmarks(args.benchmarks_folder)
-    else:
-        benchmarks_list = _get_benchmarks_from_names(
-            benchmarks_list, args.benchmarks_folder
-        )
-
+    # Load the benchmarks from the command line arguments
+    benchmarks_list = _load_benchmarks(args.benchmarks, args.benchmarks_folder)
     logging.debug(f"Using benchmarks: {benchmarks_list}")
 
     # Run the benchmarks with the runtimes
@@ -351,7 +380,7 @@ def main(args):
     for r in runtimes_list:
         logging.debug(f"Using runtime: {r['name']}")
         results[r["name"]] = dict()
-        for b in _get_benchmarks(benchmarks_list):
+        for b in benchmarks_list:
             logging.info(f"Running benchmark: {b['name']} with runtime: {r['name']}")
 
             results[r["name"]][b["name"]] = []
