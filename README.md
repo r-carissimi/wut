@@ -96,7 +96,7 @@ python3 wut.py run -b py2wasm/pystone/pystone.wasm -r wasmtime
 #### Useful Flags
 
 - `--repeat N`: Repeat each benchmark N times
-- `--no-store-output`: Don’t save output payloads, just timings
+- `--no-store-output`: Don’t save output, just timings
 - `--results-folder <path>`: Define custom output directory
 
 
@@ -113,7 +113,7 @@ python3 wut.py plot results/2025-05-06_10-56-21.json
 python3 wut.py export results/2025-05-06_10-56-21.json
 ```
 
-### 💡 Run a WASI benchmark on runtimes that do not support WASI
+### 💡 Run WASI benchmarks on runtimes that do not support WASI
 
 Refer to the [Replay Merger project](https://github.com/r-carissimi/wasm-r3-replay-generator-docker) for instructions on how to run WASI benchmarks on runtimes that do not support WASI.
 
