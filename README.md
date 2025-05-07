@@ -107,10 +107,10 @@ Plot or export results with:
 
 ```bash
 # Plot benchmark output
-python3 wut.py plot results/2025-05-06_10-56-21.json
+python3 wasure.py plot results/2025-05-06_10-56-21.json
 
 # Export results to CSV
-python3 wut.py export results/2025-05-06_10-56-21.json
+python3 wasure.py export results/2025-05-06_10-56-21.json
 ```
 
 ### 💡 Run WASI benchmarks on runtimes that do not support WASI
