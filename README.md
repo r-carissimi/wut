@@ -1,10 +1,10 @@
 <img src="assets/logo.png" width="200">
 
-# WUT - WUT Understands Timing
+# WASURE - WebAssembly SUite for Runtime Evaluation
 
 **⚠️ This is a work in progress!**
 
-**WUT** is a command-line toolkit that helps you **benchmark WebAssembly runtimes** with clarity. It lets you run benchmarks across multiple engines, manage runtime environments, and generate meaningful visualizations and exports for analysis.
+**WASURE** is a command-line toolkit that helps you **benchmark WebAssembly runtimes** with clarity. It lets you run benchmarks across multiple engines, manage runtime environments, and generate meaningful visualizations and exports for analysis.
 
 
 
@@ -22,8 +22,8 @@
 1. **Clone the repository:**
 
    ```bash
-   git clone https://github.com/r-carissimi/wut.git
-   cd wut
+   git clone https://github.com/r-carissimi/wasure.git
+   cd wasure
    ```
 
 2. **Install dependencies:**
@@ -34,12 +34,12 @@
 
 
 
-## 📖 How to Use WUT
+## 📖 How to Use WASURE
 
-WUT is structured as a command-line tool with modular subcommands to list, run, compare, and visualize WebAssembly benchmarks. Each subcommand has its own options, allowing you to start simple and scale up your experiments as needed.
+WASURE is structured as a command-line tool with modular subcommands to list, run, compare, and visualize WebAssembly benchmarks. Each subcommand has its own options, allowing you to start simple and scale up your experiments as needed.
 
 ```bash
-python3 wut.py [OPTIONS] COMMAND
+python3 wasure.py [OPTIONS] COMMAND
 ```
 
 Use `--log-level DEBUG` to troubleshoot issues and `--help` under any subcommand for more information.
@@ -51,7 +51,7 @@ Use `--log-level DEBUG` to troubleshoot issues and `--help` under any subcommand
 See what benchmarks are available:
 
 ```bash
-python3 wut.py benchmarks list
+python3 wasure.py benchmarks list
 ```
 
 
@@ -62,18 +62,18 @@ Install, update, and manage supported runtimes:
 
 ```bash
 # View available runtimes
-python3 wut.py runtimes available
+python3 wasure.py runtimes available
 
 # Install a runtime
-python3 wut.py runtimes install wasmtime
+python3 wasure.py runtimes install wasmtime
 
 # Update or remove runtimes
-python3 wut.py runtimes update wasmtime
-python3 wut.py runtimes remove wasmtime
+python3 wasure.py runtimes update wasmtime
+python3 wasure.py runtimes remove wasmtime
 
 # List installed runtimes and their versions
-python3 wut.py runtimes list
-python3 wut.py runtimes version
+python3 wasure.py runtimes list
+python3 wasure.py runtimes version
 ```
 
 
@@ -84,13 +84,13 @@ Run benchmarks with your chosen runtimes:
 
 ```bash
 # Run a single benchmark on one runtime
-python3 wut.py run -b helloworld -r wasmtime
+python3 wasure.py run -b helloworld -r wasmtime
 
 # Run multiple benchmarks on multiple runtimes
-python3 wut.py run -b pystone dummy dhrystone/dhrystone10M -r wasmtime wasmedge wasmer --repeat 3
+python3 wasure.py run -b pystone dummy dhrystone/dhrystone10M -r wasmtime wasmedge wasmer --repeat 3
 
 # Run a raw WebAssembly file directly
-python3 wut.py run -b py2wasm/pystone/pystone.wasm -r wasmtime
+python3 wasure.py run -b py2wasm/pystone/pystone.wasm -r wasmtime
 ```
 
 #### Useful Flags

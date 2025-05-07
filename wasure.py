@@ -29,8 +29,10 @@ def setup_logging(level=logging.WARNING):
 
 
 def main():
-    parser = ArgumentParser(description="WUT - WUT Understands Timing")
-    parser.add_argument("--version", action="version", version=f"WUT {VERSION}")
+    parser = ArgumentParser(
+        description="WASURE - WebAssembly SUite for Runtime Evaluation"
+    )
+    parser.add_argument("--version", action="version", version=f"WASURE {VERSION}")
     utils.add_log_level_argument(parser)
     setup_subparsers(parser, commands)
 
