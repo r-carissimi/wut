@@ -1,0 +1,40 @@
+{
+    "benchmarks": [
+        {
+            "name": "cli",
+            "path": "cli.wasm"
+        },
+		{
+			"name": "clocks",
+			"path": "clocks.wasm"
+		},
+		{
+			"name": "filesystem",
+			"path": "filesystem.wasm"
+		},
+		{
+			"name": "http",
+			"path": "http.wasm"
+		},
+		{
+			"name": "io",
+			"path": "io.wasm"
+		},
+		{
+			"name": "random",
+			"path": "random.wasm"
+		},
+		{
+			"name": "sockets",
+			"path": "sockets.wasm"
+		},
+		{
+			"name": "nn",
+			"path": "nn.wasm"
+		},
+		{
+			"name": "keyvalue",
+			"path": "keyvalue.wasm"
+		}
+    ]
+}

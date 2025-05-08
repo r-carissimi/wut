@@ -374,6 +374,10 @@ def main(args):
     benchmarks_list = _load_benchmarks(args.benchmarks, args.benchmarks_folder)
     logging.debug(f"Using benchmarks: {benchmarks_list}")
 
+    if not benchmarks_list:
+        logging.error("No benchmarks found. Exiting.")
+        return
+
     # Run the benchmarks with the runtimes
     results = dict()
 
