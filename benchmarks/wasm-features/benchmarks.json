@@ -1,0 +1,68 @@
+{
+    "benchmarks": [
+        {
+            "name": "bulk-memory",
+            "path": "bulk-memory.wasm"
+        },
+        {
+            "name": "exceptions",
+            "path": "exceptions.wasm"
+        },
+        {
+            "name": "extended-const",
+            "path": "extended-const.wasm"
+        },
+        {
+            "name": "gc",
+            "path": "gc.wasm"
+        },
+        {
+            "name": "memory64",
+            "path": "memory64.wasm"
+        },
+        {
+            "name": "multi-memory",
+            "path": "multi-memory.wasm"
+        },
+        {
+            "name": "multi-value",
+            "path": "multi-value.wasm"
+        },
+        {
+            "name": "mutable-globals",
+            "path": "mutable-globals.wasm"
+        },
+        {
+            "name": "reference-types",
+            "path": "reference-types.wasm"
+        },
+        {
+            "name": "relaxed-simd",
+            "path": "relaxed-simd.wasm"
+        },
+        {
+            "name": "saturated-float-to-int",
+            "path": "saturated-float-to-int.wasm"
+        },
+        {
+            "name": "sign-extensions",
+            "path": "sign-extensions.wasm"
+        },
+        {
+            "name": "simd",
+            "path": "simd.wasm"
+        },
+        {
+            "name": "tail-call",
+            "path": "tail-call.wasm"
+        },
+        {
+            "name": "threads",
+            "path": "threads.wasm"
+        },
+        {
+            "name": "typed-function-references",
+            "path": "typed-function-references.wasm"
+        }
+    ]
+}
