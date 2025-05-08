@@ -8,7 +8,7 @@ import logging
 import os
 import shutil
 
-from . import utils
+from . import run, utils
 
 
 def parse(parser):
@@ -49,8 +49,8 @@ def parse(parser):
     # "install" command to install a runtime
     install_parser = subparsers.add_parser(
         "install",
-        help=_install_runtime.__doc__.split("\n")[0],
-        description=_install_runtime.__doc__.split("\n")[0],
+        help="Install a runtime",
+        description="Install a runtime",
     )
 
     install_parser.add_argument(
@@ -75,6 +75,19 @@ def parse(parser):
         "--runtimes-folder",
         default="runtimes",
         help="Path to the folder containing runtimes (default: runtimes)",
+    )
+
+    install_parser.add_argument(
+        "--benchmarks-folder",
+        default="benchmarks",
+        help="Path to the folder containing the benchmarks (default: benchmarks)",
+    )
+
+    install_parser.add_argument(
+        "--no-runtime-check",
+        action="store_true",
+        default=False,
+        help="Skip runtime check after installation",
     )
 
     # "remove" command to remove a runtime
@@ -124,8 +137,8 @@ def parse(parser):
     # "update" command to update the runtimes
     update_parser = subparsers.add_parser(
         "update",
-        help=_update_runtime.__doc__.split("\n")[0],
-        description=_update_runtime.__doc__.split("\n")[0],
+        help="Update a runtime",
+        description="Update a runtime",
     )
 
     update_parser.add_argument(
@@ -336,19 +349,55 @@ def _execute_runtime_command(runtime, command_key, runtimes_folder="runtimes"):
         return False
 
 
-def _install_runtime(
-    runtime, runtimes_folder="runtimes", runtimes_file="runtimes.json"
-):
-    """Installs a runtime."""
+def _check_runtime_installation(runtime, runtimes_folder, benchmarks_folder):
+    """Checks that a runtime is working by executing a dummy payload.
 
-    if _execute_runtime_command(runtime, "install-command", runtimes_folder):
-        _add_runtime_to_runtimes_file(runtime, runtimes_file)
+    - If a subruntime is not working, it will be removed from the runtime.
+    - If the main runtime is not working, but at least a subruntime is, it will
+      not be removed.
+    - If the main runtime is not working and no subruntime is working,
+      None is returned.
+    """
 
+    logging.info(f"Checking installation of {runtime['name']}...")
 
-def _update_runtime(runtime, runtimes_folder="runtimes"):
-    """Update a runtime."""
+    # We're using a dummy payload to check if the runtime is working
+    dummy_payload = {"name": "dummy", "path": "dummy/dummy.wasm"}
 
-    _execute_runtime_command(runtime, "update-command", runtimes_folder)
+    # Check subruntimes
+    working_subruntimes = []
+    if "subruntimes" in runtime:
+        for subruntime in runtime["subruntimes"]:
+            _, _, return_code, _, _ = run.compile_and_run_benchmark(
+                dummy_payload, subruntime, benchmarks_folder, runtimes_folder
+            )
+
+            if return_code != 0:
+                logging.warning(
+                    f"Subruntime {subruntime['name']} failed dummy run. Removing."
+                )
+                continue
+
+            working_subruntimes.append(subruntime)
+
+        runtime["subruntimes"] = working_subruntimes
+
+    # Check main runtime
+    _, _, return_code, _, _ = run.compile_and_run_benchmark(
+        dummy_payload, runtime, benchmarks_folder, runtimes_folder
+    )
+
+    if return_code != 0:
+        logging.warning(f"Main runtime {runtime['name']} failed dummy run.")
+
+        # Delete runtime only if no subruntimes are working
+        if not runtime.get("subruntimes"):
+            logging.error(
+                f"No working subruntimes for {runtime['name']}. Installation failed."
+            )
+            return None
+
+    return runtime
 
 
 def _remove_runtime_from_runtimes_file(name, file="runtimes/runtimes.json"):
@@ -451,6 +500,7 @@ def main(args):
         args.installers_folder = utils.get_absolute_path(args.installers_folder)
         args.runtimes_folder = utils.get_absolute_path(args.runtimes_folder)
         args.runtimes_file = utils.get_absolute_path(args.runtimes_file)
+        args.benchmarks_folder = utils.get_absolute_path(args.benchmarks_folder)
 
         available_runtimes = _list_available_runtimes(args.installers_folder)
         runtime = _get_available_runtime_by_name(args.name, available_runtimes)
@@ -465,7 +515,13 @@ def main(args):
             return
 
         # Install the runtime
-        _install_runtime(runtime, args.runtimes_folder, args.runtimes_file)
+        if _execute_runtime_command(runtime, "install-command", args.runtimes_folder):
+            if not args.no_runtime_check:
+                runtime = _check_runtime_installation(
+                    runtime, args.runtimes_folder, args.benchmarks_folder
+                )
+            if runtime:
+                _add_runtime_to_runtimes_file(runtime, args.runtimes_file)
 
     elif args.operation == "remove":
         args.runtimes_folder = utils.get_absolute_path(args.runtimes_folder)
@@ -529,7 +585,7 @@ def main(args):
             return
 
         # Update the runtime
-        _update_runtime(runtime, args.runtimes_folder)
+        _execute_runtime_command(runtime, "update-command", args.runtimes_folder)
 
     else:
         print("Unknown operation. Use 'list' to see available runtimes.")

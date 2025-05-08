@@ -328,6 +328,42 @@ def _compile_benchmark(benchmark, runtime, benchmarks_folder, runtimes_folder):
     return None
 
 
+def compile_and_run_benchmark(benchmark, runtime, benchmarks_folder, runtimes_folder):
+    """Compile and run a benchmark using AOT if applicable.
+
+    Args:
+        benchmark (dict): The benchmark to compile and run.
+        runtime (dict): The runtime to use.
+        benchmarks_folder (str): The folder containing the benchmarks.
+        runtimes_folder (str): The folder containing the runtimes.
+
+    Returns:
+        tuple: A tuple containing
+               * elapsed time: The elapsed time of the benchmark in nanoseconds
+               * score: The score of the benchmark (if applicable)
+               * return code: The return code of the benchmark
+               * output: The output of the benchmark as a string
+               * stats: A dictionary containing the parsed stats from the output
+    """
+    precompiled_path = None
+    if runtime.get("aot-command"):
+        precompiled_path = _compile_benchmark(
+            benchmark, runtime, benchmarks_folder, runtimes_folder
+        )
+        if precompiled_path is None:
+            return 0, 0, 1, "", {}
+
+    output = _run_benchmark_with_runtime(
+        benchmark, runtime, benchmarks_folder, runtimes_folder, precompiled_path
+    )
+
+    if precompiled_path and os.path.exists(precompiled_path):
+        os.remove(precompiled_path)
+        logging.debug(f"Removed precompiled file: {precompiled_path}")
+
+    return output
+
+
 def _save_results_to_file(results, folder="results"):
     if not os.path.exists(folder):
         os.makedirs(folder)
