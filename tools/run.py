@@ -111,7 +111,7 @@ def _get_named_benchmarks(benchmarks_list, benchmarks_folder="benchmarks"):
     return benchs
 
 
-def _load_benchmarks(benchmarks_list, benchmarks_folder):
+def load_benchmarks(benchmarks_list, benchmarks_folder):
     """Load benchmarks from a list of names and files.
 
     Args:
@@ -120,6 +120,7 @@ def _load_benchmarks(benchmarks_list, benchmarks_folder):
 
     Returns:
         list: A list of benchmark dictionaries with their names and paths.
+        Returns an empty list if no benchmarks are found.
     """
 
     # Load benchmarks from files
@@ -358,8 +359,17 @@ def _save_results_to_file(results, folder="results"):
     logging.info(f"Results saved to {filename}")
 
 
-def _get_runtimes(runtimes_file, chosen_runtimes):
-    """Loads and prepares the list of runtimes."""
+def get_runtimes(runtimes_file, chosen_runtimes):
+    """Loads and prepares the list of runtimes.
+
+    Args:
+        runtimes_file (str): Path to the JSON file containing runtimes.
+        chosen_runtimes (list): List of runtimes to use. Use 'all' to use all runtimes.
+
+    Returns:
+        list: A list of dictionaries containing the runtimes.
+        Returns an empty list if no runtimes are found.
+    """
 
     runtimes_list = runtimes.list_runtimes(file=runtimes_file)
     flattened_runtimes = [
@@ -482,7 +492,7 @@ def main(args):
     runtimes_folder = utils.get_absolute_path(args.runtimes_folder)
 
     # Loads the runtimes
-    runtimes_list = _get_runtimes(runtimes_file, args.runtimes)
+    runtimes_list = get_runtimes(runtimes_file, args.runtimes)
     logging.debug(f"Using runtimes: {[r['name'] for r in runtimes_list]}")
 
     if not runtimes_list:
@@ -490,7 +500,7 @@ def main(args):
         return
 
     # Load the benchmarks from the command line arguments
-    benchmarks_list = _load_benchmarks(args.benchmarks, benchmarks_folder)
+    benchmarks_list = load_benchmarks(args.benchmarks, benchmarks_folder)
     logging.debug(f"Using benchmarks: {benchmarks_list}")
 
     if not benchmarks_list:

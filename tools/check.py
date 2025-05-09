@@ -65,7 +65,7 @@ def main(args):
     runtimes_folder = utils.get_absolute_path(args.runtimes_folder)
 
     # Loads the runtimes
-    runtimes_list = run._get_runtimes(runtimes_file, args.runtimes)
+    runtimes_list = run.get_runtimes(runtimes_file, args.runtimes)
     logging.debug(f"Using runtimes: {[r['name'] for r in runtimes_list]}")
 
     if not runtimes_list:
@@ -73,7 +73,7 @@ def main(args):
         return
 
     # Load the benchmarks from the command line arguments
-    benchmarks_list = run._load_benchmarks([args.benchmark], benchmarks_folder)
+    benchmarks_list = run.load_benchmarks([args.benchmark], benchmarks_folder)
     logging.debug(f"Using benchmarks: {benchmarks_list}")
 
     if not benchmarks_list:
