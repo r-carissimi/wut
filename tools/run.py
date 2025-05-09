@@ -9,6 +9,7 @@ import json
 import logging
 import os
 import re
+import subprocess
 import time
 
 from . import benchmarks, runtimes, utils
@@ -251,16 +252,19 @@ def _run_benchmark_with_runtime(
 
     logging.debug(f"Running '{command}'")
 
-    os.chdir(runtimes_folder)
-
     start_time = time.perf_counter_ns()
-    process = os.popen(command)
-    output = process.read()
+    process = subprocess.Popen(
+        command,
+        shell=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        cwd=runtimes_folder,
+    )
+    stdout, stderr = process.communicate()
     end_time = time.perf_counter_ns()
     elapsed_time = end_time - start_time
 
-    return_code = process.close() or 0
-
+    output = stdout.decode().strip() + stderr.decode().strip()
     logging.debug(f"Output: {output}")
 
     # Validate the output with a regex, if specified
@@ -270,7 +274,7 @@ def _run_benchmark_with_runtime(
         logging.warning(
             f"Output validation failed for benchmark {benchmark['name']} with runtime {runtime['name']}"
         )
-        return 0, 0, return_code, output, {}
+        return 0, 0, process.returncode, output, {}
     logging.debug(
         f"Output validation succeeded for benchmark {benchmark['name']} with runtime {runtime['name']}"
     )
@@ -287,7 +291,7 @@ def _run_benchmark_with_runtime(
         if (match := re.search(stat_regex, output))
     }
 
-    return elapsed_time, score, return_code, output, stats
+    return elapsed_time, score, process.returncode, output, stats
 
 
 def _compile_benchmark(benchmark, runtime, benchmarks_folder, runtimes_folder):
@@ -316,13 +320,22 @@ def _compile_benchmark(benchmark, runtime, benchmarks_folder, runtimes_folder):
             input=f'"{benchmark_path}"', output=f'"{precompiled_path}"'
         )
         logging.debug(f"Running AOT command: '{aot_command}'")
-        os.chdir(runtimes_folder)
-        process = os.popen(aot_command)
-        output = process.read()
-        logging.debug(f"AOT output: {output}")
-        if process.close() is not None:
+        process = subprocess.Popen(
+            aot_command,
+            shell=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            cwd=runtimes_folder,
+        )
+        stdout, stderr = process.communicate()
+
+        logging.debug(f"AOT stdout: {stdout.decode().strip()}")
+        logging.debug(f"AOT stderr: {stderr.decode().strip()}")
+
+        if process.returncode != 0:
             logging.error(
-                f"AOT compilation failed for {benchmark['name']} with runtime {runtime['name']}"
+                f"AOT compilation failed for {benchmark['name']} with runtime {runtime['name']}. "
+                f"Error: {stderr.decode().strip()}"
             )
             return None
 
@@ -462,7 +475,7 @@ def run_benchmark_iterations(
 def main(args):
     logging.getLogger().setLevel(getattr(logging, args.log_level.upper()))
 
-    # Resolve absolute paths for key arguments
+    # Resolve absolute paths
     benchmarks_folder = utils.get_absolute_path(args.benchmarks_folder)
     runtimes_file = utils.get_absolute_path(args.runtimes_file)
     results_folder = utils.get_absolute_path(args.results_folder)
@@ -471,6 +484,10 @@ def main(args):
     # Loads the runtimes
     runtimes_list = _get_runtimes(runtimes_file, args.runtimes)
     logging.debug(f"Using runtimes: {[r['name'] for r in runtimes_list]}")
+
+    if not runtimes_list:
+        logging.error("No runtimes found. Exiting.")
+        return
 
     # Load the benchmarks from the command line arguments
     benchmarks_list = _load_benchmarks(args.benchmarks, benchmarks_folder)
