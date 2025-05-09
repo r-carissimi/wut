@@ -1,4 +1,4 @@
-"""WebAssembly runtimes management
+"""Manages WebAssembly runtimes
 
 This module provides a command-line interface (CLI) for managing WebAssembly runtimes.
 """
@@ -365,29 +365,27 @@ def _check_runtime_installation(runtime, runtimes_folder, benchmarks_folder):
     dummy_payload = {"name": "dummy", "path": "dummy/dummy.wasm"}
 
     # Check subruntimes
-    working_subruntimes = []
     if "subruntimes" in runtime:
-        for subruntime in runtime["subruntimes"]:
-            _, _, return_code, _, _ = run.compile_and_run_benchmark(
-                dummy_payload, subruntime, benchmarks_folder, runtimes_folder
-            )
-
-            if return_code != 0:
-                logging.warning(
-                    f"Subruntime {subruntime['name']} failed dummy run. Removing."
+        runtime["subruntimes"] = [
+            subruntime
+            for subruntime in runtime["subruntimes"]
+            if (
+                results := run.run_benchmark_iterations(
+                    dummy_payload, subruntime, benchmarks_folder, runtimes_folder
                 )
-                continue
-
-            working_subruntimes.append(subruntime)
-
-        runtime["subruntimes"] = working_subruntimes
+            )
+            and results[0].get("return_code", 1) == 0
+            or logging.warning(
+                f"Subruntime {subruntime['name']} failed dummy run. Removing."
+            )
+        ]
 
     # Check main runtime
-    _, _, return_code, _, _ = run.compile_and_run_benchmark(
+    results = run.run_benchmark_iterations(
         dummy_payload, runtime, benchmarks_folder, runtimes_folder
     )
 
-    if return_code != 0:
+    if not results or results[0].get("return_code", 1) != 0:
         logging.warning(f"Main runtime {runtime['name']} failed dummy run.")
 
         # Delete runtime only if no subruntimes are working

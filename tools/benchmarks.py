@@ -1,4 +1,4 @@
-"""Webassembly benchmarks management
+"""Manages installed benchmarks
 
 This module provides a command-line interface (CLI) for managing WebAssembly benchmarks.
 """

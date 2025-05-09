@@ -9,7 +9,7 @@ def add_log_level_argument(parser):
     parser.add_argument(
         "--log-level",
         default="INFO",
-        choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+        choices=["DEBUG", "INFO", "WARNING", "ERROR"],
         help="Set the logging level (default: INFO)",
     )
 

@@ -59,6 +59,12 @@ def parse(parser):
     )
 
     parser.add_argument(
+        "--runtimes-folder",
+        default="runtimes",
+        help="Path to the folder containing runtimes (default: runtimes)",
+    )
+
+    parser.add_argument(
         "--results-folder",
         default="results",
         help="Path to the folder where results will be saved (default: results)",
@@ -328,42 +334,6 @@ def _compile_benchmark(benchmark, runtime, benchmarks_folder, runtimes_folder):
     return None
 
 
-def compile_and_run_benchmark(benchmark, runtime, benchmarks_folder, runtimes_folder):
-    """Compile and run a benchmark using AOT if applicable.
-
-    Args:
-        benchmark (dict): The benchmark to compile and run.
-        runtime (dict): The runtime to use.
-        benchmarks_folder (str): The folder containing the benchmarks.
-        runtimes_folder (str): The folder containing the runtimes.
-
-    Returns:
-        tuple: A tuple containing
-               * elapsed time: The elapsed time of the benchmark in nanoseconds
-               * score: The score of the benchmark (if applicable)
-               * return code: The return code of the benchmark
-               * output: The output of the benchmark as a string
-               * stats: A dictionary containing the parsed stats from the output
-    """
-    precompiled_path = None
-    if runtime.get("aot-command"):
-        precompiled_path = _compile_benchmark(
-            benchmark, runtime, benchmarks_folder, runtimes_folder
-        )
-        if precompiled_path is None:
-            return 0, 0, 1, "", {}
-
-    output = _run_benchmark_with_runtime(
-        benchmark, runtime, benchmarks_folder, runtimes_folder, precompiled_path
-    )
-
-    if precompiled_path and os.path.exists(precompiled_path):
-        os.remove(precompiled_path)
-        logging.debug(f"Removed precompiled file: {precompiled_path}")
-
-    return output
-
-
 def _save_results_to_file(results, folder="results"):
     if not os.path.exists(folder):
         os.makedirs(folder)
@@ -375,101 +345,150 @@ def _save_results_to_file(results, folder="results"):
     logging.info(f"Results saved to {filename}")
 
 
-def main(args):
-    logging.getLogger().setLevel(getattr(logging, args.log_level.upper()))
+def _get_runtimes(runtimes_file, chosen_runtimes):
+    """Loads and prepares the list of runtimes."""
 
-    args.benchmarks_folder = utils.get_absolute_path(args.benchmarks_folder)
-    args.runtimes_file = utils.get_absolute_path(args.runtimes_file)
-    args.results_folder = utils.get_absolute_path(args.results_folder)
-
-    runtimes_folder = os.path.dirname(os.path.abspath(args.runtimes_file))
-
-    # Get the runtime objects from the command line arguments
-    runtimes_list = runtimes.list_runtimes(file=args.runtimes_file)
-
-    # "all" means subruntimes as well. we need to bring them to the top level.
-    # Since we're at it, we'll also select only the relevant fields
-    runtimes_list = [
-        {
-            "name": runtime["name"],
-            "command": runtime["command"],
-            "aot-command": runtime.get("aot-command", ""),
-            "stats-parser": runtime.get("stats-parser", {}),
-            "entrypoint-flag": runtime.get("entrypoint-flag", ""),
-        }
+    runtimes_list = runtimes.list_runtimes(file=runtimes_file)
+    flattened_runtimes = [
+        runtime
         for runtime in runtimes_list
         for runtime in ([runtime] + runtime.pop("subruntimes", []))
     ]
 
-    if "all" not in args.runtimes:
-        runtimes_list = _filter_runtimes_by_name(args.runtimes, runtimes_list)
+    if "all" in chosen_runtimes:
+        return flattened_runtimes
 
+    return _filter_runtimes_by_name(chosen_runtimes, flattened_runtimes)
+
+
+def _run_benchmarks(
+    runtimes_list,
+    benchmarks_list,
+    benchmarks_folder,
+    runtimes_folder,
+    repeat=1,
+    no_store_output=False,
+):
+    """Runs benchmarks for each runtime and collects results."""
+
+    results = {}
+
+    for runtime in runtimes_list:
+        logging.debug(f"Using runtime: {runtime['name']}")
+        results[runtime["name"]] = {}
+
+        for benchmark in benchmarks_list:
+            logging.info(
+                f"Running benchmark: {benchmark['name']} with runtime: {runtime['name']}"
+            )
+            results[runtime["name"]][benchmark["name"]] = run_benchmark_iterations(
+                benchmark,
+                runtime,
+                benchmarks_folder,
+                runtimes_folder,
+                repeat,
+                no_store_output,
+            )
+
+    return results
+
+
+def run_benchmark_iterations(
+    benchmark,
+    runtime,
+    benchmarks_folder,
+    runtimes_folder,
+    repeat=1,
+    no_store_output=False,
+):
+    """Runs multiple iterations of a benchmark and collects results.
+
+    Args:
+        benchmark (dict): The benchmark to run.
+        runtime (dict): The runtime to use.
+        benchmarks_folder (str): The folder containing the benchmarks.
+        runtimes_folder (str): The folder containing the runtimes.
+        repeat (int): Number of times to repeat the benchmark.
+        no_store_output (bool): If True, do not store the output of the benchmark.
+
+    Returns:
+        list: A list of dictionaries containing the results of each iteration.
+        Returns None if the benchmark fails to compile.
+    """
+
+    iterations_results = []
+    precompiled_path = None
+
+    if runtime.get("aot-command"):
+        precompiled_path = _compile_benchmark(
+            benchmark, runtime, benchmarks_folder, runtimes_folder
+        )
+        if precompiled_path is None:
+            return None
+
+    for i in range(repeat):
+        logging.info(f"Running iteration {i + 1}/{repeat}")
+        elapsed_time, score, return_code, output, stats = _run_benchmark_with_runtime(
+            benchmark,
+            runtime,
+            benchmarks_folder,
+            runtimes_folder,
+            precompiled_path,
+        )
+
+        if return_code != 0:
+            logging.warning(
+                f"Benchmark {benchmark['name']} failed with return code {return_code}"
+            )
+            elapsed_time, score = 0, 0
+
+        iterations_results.append(
+            {
+                "elapsed_time": elapsed_time,
+                "score": score,
+                "return_code": return_code,
+                **({"output": output} if not no_store_output else {}),
+                **({"stats": stats} if stats else {}),
+            }
+        )
+
+    if precompiled_path and os.path.exists(precompiled_path):
+        os.remove(precompiled_path)
+        logging.debug(f"Removed precompiled file: {precompiled_path}")
+
+    return iterations_results
+
+
+def main(args):
+    logging.getLogger().setLevel(getattr(logging, args.log_level.upper()))
+
+    # Resolve absolute paths for key arguments
+    benchmarks_folder = utils.get_absolute_path(args.benchmarks_folder)
+    runtimes_file = utils.get_absolute_path(args.runtimes_file)
+    results_folder = utils.get_absolute_path(args.results_folder)
+    runtimes_folder = utils.get_absolute_path(args.runtimes_folder)
+
+    # Loads the runtimes
+    runtimes_list = _get_runtimes(runtimes_file, args.runtimes)
     logging.debug(f"Using runtimes: {[r['name'] for r in runtimes_list]}")
 
     # Load the benchmarks from the command line arguments
-    benchmarks_list = _load_benchmarks(args.benchmarks, args.benchmarks_folder)
+    benchmarks_list = _load_benchmarks(args.benchmarks, benchmarks_folder)
     logging.debug(f"Using benchmarks: {benchmarks_list}")
 
     if not benchmarks_list:
         logging.error("No benchmarks found. Exiting.")
         return
 
-    # Run the benchmarks with the runtimes
-    results = dict()
+    # Run benchmarks
+    results = _run_benchmarks(
+        runtimes_list,
+        benchmarks_list,
+        benchmarks_folder,
+        runtimes_folder,
+        args.repeat,
+        args.no_store_output,
+    )
 
-    for r in runtimes_list:
-        logging.debug(f"Using runtime: {r['name']}")
-        results[r["name"]] = dict()
-        for b in benchmarks_list:
-            logging.info(f"Running benchmark: {b['name']} with runtime: {r['name']}")
-
-            results[r["name"]][b["name"]] = []
-
-            precompiled_path = None
-            if r["aot-command"]:
-                precompiled_path = _compile_benchmark(
-                    b, r, args.benchmarks_folder, runtimes_folder
-                )
-                if precompiled_path is None:
-                    continue
-
-            for i in range(args.repeat):
-                logging.info(f"Running iteration {i + 1}/{args.repeat}")
-                elapsed_time, score, return_code, output, stats = (
-                    _run_benchmark_with_runtime(
-                        b, r, args.benchmarks_folder, runtimes_folder, precompiled_path
-                    )
-                )
-
-                logging.info(f"Elapsed time: {elapsed_time} ns")
-                logging.info(f"Score: {score}")
-                logging.debug(f"Return code: {return_code}")
-                if return_code != 0:
-                    logging.warning(
-                        f"Benchmark {b['name']} failed with return code {return_code}"
-                    )
-                    elapsed_time = 0
-                    score = 0
-
-                logging.debug(f"Stats: {stats}")
-                logging.debug(f"Storing output is disabled: {args.no_store_output}")
-
-                # Output is stored unless the user specified not to
-                results[r["name"]][b["name"]].append(
-                    {
-                        "elapsed_time": elapsed_time,
-                        "score": score,
-                        "return_code": return_code,
-                        **({"output": output} if not args.no_store_output else {}),
-                        **({"stats": stats} if stats else {}),
-                    }
-                )
-
-            # Cleanup precompiled file after all iterations
-            if precompiled_path and os.path.exists(precompiled_path):
-                os.remove(precompiled_path)
-                logging.debug(f"Removed precompiled file: {precompiled_path}")
-
-    logging.debug(f"Results: {results}")
-
-    _save_results_to_file(results, folder=args.results_folder)
+    # Save results
+    _save_results_to_file(results, folder=results_folder)
