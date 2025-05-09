@@ -113,6 +113,19 @@ python3 wasure.py plot results/2025-05-06_10-56-21.json
 python3 wasure.py export results/2025-05-06_10-56-21.json
 ```
 
+### ✅ Checking Runtimes Support
+
+The `check` command allows you to verify if specific benchmarks run successfully on selected runtimes. It is particularly useful when combined with the `wasm-features` or `wasi-proposals` benchmark groups. These groups enable you to track which runtime has implemented specific features or proposals.
+
+```bash
+# Check the wasm features support on all runtimes
+python3 wasure.py check wasm-features
+
+# Check the wasi proposals implementation on wasmtime and wasmedge
+python3 wasure.py check wasi-proposals -r wasmtime wasmedge
+```
+
+
 ### 💡 Run WASI benchmarks on runtimes that do not support WASI
 
 Refer to the [Replay Merger project](https://github.com/r-carissimi/wasm-r3-replay-generator-docker) for instructions on how to run WASI benchmarks on runtimes that do not support WASI.
