@@ -1,4 +1,4 @@
-<img src="assets/logo.png" width="200">
+<img src="https://raw.githubusercontent.com/r-carissimi/wasure/9c23740a47eaab6444735afcdca79dbcca17a57b/assets/logo.png" width="200">
 
 # WASURE - WebAssembly SUite for Runtime Evaluation
 
@@ -19,18 +19,34 @@
 
 ## 🛠 Getting Started
 
-1. **Clone the repository:**
+### 📦 Quick Install (Recommended)
 
-   ```bash
-   git clone https://github.com/r-carissimi/wasure.git
-   cd wasure/wasure
-   ```
+Install the latest released version from PyPI:
 
-2. **Install dependencies:**
+```bash
+pip install wasure
+```
 
-   ```bash
-   pip install -r ../requirements.txt
-   ```
+### 🛠 Install Latest Version from GitHub
+If you want the newest features or fixes, install directly from the repository:
+
+```bash
+git clone https://github.com/r-carissimi/wasure.git
+cd wasure
+pip install .
+```
+
+### 🚧 Run Without Installing
+
+If you prefer not to install, you can run WASURE directly from the source. In this case, **replace every occurrence of `wasure` with `python3 wasure.py`** in the usage examples.
+
+Clone the repository and install dependencies:
+
+```bash
+git clone https://github.com/r-carissimi/wasure.git
+cd wasure/wasure
+pip install -r ../requirements.txt
+```
 
 
 
@@ -39,7 +55,7 @@
 WASURE is structured as a command-line tool with modular subcommands to list, run, compare, and visualize WebAssembly benchmarks. Each subcommand has its own options, allowing you to start simple and scale up your experiments as needed.
 
 ```bash
-python3 wasure.py [OPTIONS] COMMAND
+wasure [OPTIONS] COMMAND
 ```
 
 Use `--log-level DEBUG` to troubleshoot issues and `--help` under any subcommand for more information.
@@ -51,7 +67,7 @@ Use `--log-level DEBUG` to troubleshoot issues and `--help` under any subcommand
 See what benchmarks are available:
 
 ```bash
-python3 wasure.py benchmarks list
+wasure benchmarks list
 ```
 
 
@@ -62,18 +78,18 @@ Install, update, and manage supported runtimes:
 
 ```bash
 # View available runtimes
-python3 wasure.py runtimes available
+wasure runtimes available
 
 # Install a runtime
-python3 wasure.py runtimes install wasmtime
+wasure runtimes install wasmtime
 
 # Update or remove runtimes
-python3 wasure.py runtimes update wasmtime
-python3 wasure.py runtimes remove wasmtime
+wasure runtimes update wasmtime
+wasure runtimes remove wasmtime
 
 # List installed runtimes and their versions
-python3 wasure.py runtimes list
-python3 wasure.py runtimes version
+wasure runtimes list
+wasure runtimes version
 ```
 
 
@@ -84,13 +100,13 @@ Run benchmarks with your chosen runtimes:
 
 ```bash
 # Run a single benchmark on one runtime
-python3 wasure.py run -b helloworld -r wasmtime
+wasure run -b helloworld -r wasmtime
 
 # Run multiple benchmarks on multiple runtimes
-python3 wasure.py run -b pystone dummy dhrystone/dhrystone10M -r wasmtime wasmedge wasmer --repeat 3
+wasure run -b pystone dummy dhrystone/dhrystone10M -r wasmtime wasmedge wasmer --repeat 3
 
 # Run a raw WebAssembly file directly
-python3 wasure.py run -b py2wasm/pystone/pystone.wasm -r wasmtime
+wasure run -b py2wasm/pystone/pystone.wasm -r wasmtime
 ```
 
 #### Useful Flags
@@ -107,11 +123,13 @@ Plot or export results with:
 
 ```bash
 # Plot benchmark output
-python3 wasure.py plot results/2025-05-06_10-56-21.json
+wasure plot /path/to/results/2025-05-06_10-56-21.json
 
 # Export results to CSV
-python3 wasure.py export results/2025-05-06_10-56-21.json
+wasure export /path/to/results/2025-05-06_10-56-21.json
 ```
+
+
 
 ### ✅ Checking Runtimes Support
 
@@ -119,11 +137,12 @@ The `check` command allows you to verify if specific benchmarks run successfully
 
 ```bash
 # Check the wasm features support on all runtimes
-python3 wasure.py check wasm-features
+wasure check wasm-features
 
 # Check the wasi proposals implementation on wasmtime and wasmedge
-python3 wasure.py check wasi-proposals -r wasmtime wasmedge
+wasure check wasi-proposals -r wasmtime wasmedge
 ```
+
 
 
 ### 💡 Run WASI benchmarks on runtimes that do not support WASI
