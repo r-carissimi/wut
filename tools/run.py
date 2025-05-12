@@ -22,6 +22,10 @@ def parse(parser):
         parser (ArgumentParser): The argument parser to add subcommands to.
     """
 
+    # We use os.path.dirname two times because the script is in the tools
+    # folder and we want to get the runtimes folder.
+    script_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
     parser.add_argument(
         "-r",
         "--runtimes",
@@ -49,26 +53,26 @@ def parse(parser):
 
     parser.add_argument(
         "--benchmarks-folder",
-        default="benchmarks",
-        help="Path to the folder containing benchmarks (default: benchmarks)",
+        default=os.path.join(script_dir, utils.DEFAULT_BENCHMARKS_FOLDER),
+        help=f"Path to the folder containing benchmarks (default: {utils.DEFAULT_BENCHMARKS_FOLDER})",
     )
 
     parser.add_argument(
         "--runtimes-file",
-        default="runtimes/runtimes.json",
-        help="Path to the JSON file containing runtimes (default: runtimes/runtimes.json)",
+        default=os.path.join(script_dir, utils.DEFAULT_RUNTIMES_FILE),
+        help=f"Path to the JSON file containing runtimes (default: {utils.DEFAULT_RUNTIMES_FILE})",
     )
 
     parser.add_argument(
         "--runtimes-folder",
-        default="runtimes",
-        help="Path to the folder containing runtimes (default: runtimes)",
+        default=os.path.join(script_dir, utils.DEFAULT_RUNTIMES_FOLDER),
+        help=f"Path to the folder containing runtimes (default: {utils.DEFAULT_RUNTIMES_FOLDER})",
     )
 
     parser.add_argument(
         "--results-folder",
-        default="results",
-        help="Path to the folder where results will be saved (default: results)",
+        default=os.path.join(script_dir, utils.DEFAULT_RESULTS_FOLDER),
+        help=f"Path to the folder where results will be saved (default: {utils.DEFAULT_RESULTS_FOLDER})",
     )
 
     parser.add_argument(
@@ -93,7 +97,9 @@ def _filter_runtimes_by_name(selected_runtimes, runtimes_list):
     return filtered_runtimes
 
 
-def _get_named_benchmarks(benchmarks_list, benchmarks_folder="benchmarks"):
+def _get_named_benchmarks(
+    benchmarks_list, benchmarks_folder=utils.DEFAULT_BENCHMARKS_FOLDER
+):
     benchs = dict()
 
     for benchmark_name in benchmarks_list:
@@ -348,7 +354,7 @@ def _compile_benchmark(benchmark, runtime, benchmarks_folder, runtimes_folder):
     return None
 
 
-def _save_results_to_file(results, folder="results"):
+def _save_results_to_file(results, folder=utils.DEFAULT_RESULTS_FOLDER):
     if not os.path.exists(folder):
         os.makedirs(folder)
 

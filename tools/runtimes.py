@@ -18,6 +18,10 @@ def parse(parser):
         parser (ArgumentParser): The argument parser to add subcommands to.
     """
 
+    # We use os.path.dirname two times because the script is in the tools
+    # folder and we want to get the runtimes folder.
+    script_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
     subparsers = parser.add_subparsers(dest="operation", required=True)
 
     # "list" command to list installed runtimes
@@ -29,8 +33,8 @@ def parse(parser):
 
     list_parser.add_argument(
         "--runtimes-file",
-        default="runtimes/runtimes.json",
-        help="Path to the JSON file containing runtimes (default: runtimes/runtimes.json)",
+        default=os.path.join(script_dir, utils.DEFAULT_RUNTIMES_FILE),
+        help=f"Path to the JSON file containing runtimes (default: {utils.DEFAULT_RUNTIMES_FILE})",
     )
 
     # "available" command to list available runtimes
@@ -42,8 +46,8 @@ def parse(parser):
 
     available_parser.add_argument(
         "--installers-folder",
-        default="installers",
-        help="Path to the folder containing installers (default: installers)",
+        default=os.path.join(script_dir, utils.DEFAULT_INSTALLERS_FOLDER),
+        help=f"Path to the folder containing installers (default: {utils.DEFAULT_INSTALLERS_FOLDER})",
     )
 
     # "install" command to install a runtime
@@ -61,26 +65,26 @@ def parse(parser):
 
     install_parser.add_argument(
         "--installers-folder",
-        default="installers",
-        help="Path to the folder containing installers (default: installers)",
+        default=os.path.join(script_dir, utils.DEFAULT_INSTALLERS_FOLDER),
+        help=f"Path to the folder containing installers (default: {utils.DEFAULT_INSTALLERS_FOLDER})",
     )
 
     install_parser.add_argument(
         "--runtimes-file",
-        default="runtimes/runtimes.json",
-        help="Path to the JSON file containing runtimes (default: runtimes/runtimes.json)",
+        default=os.path.join(script_dir, utils.DEFAULT_RUNTIMES_FILE),
+        help=f"Path to the JSON file containing runtimes (default: {utils.DEFAULT_RUNTIMES_FILE})",
     )
 
     install_parser.add_argument(
         "--runtimes-folder",
-        default="runtimes",
-        help="Path to the folder containing runtimes (default: runtimes)",
+        default=os.path.join(script_dir, utils.DEFAULT_RUNTIMES_FOLDER),
+        help=f"Path to the folder containing runtimes (default: {utils.DEFAULT_RUNTIMES_FOLDER})",
     )
 
     install_parser.add_argument(
         "--benchmarks-folder",
-        default="benchmarks",
-        help="Path to the folder containing the benchmarks (default: benchmarks)",
+        default=os.path.join(script_dir, utils.DEFAULT_BENCHMARKS_FOLDER),
+        help=f"Path to the folder containing the benchmarks (default: {utils.DEFAULT_BENCHMARKS_FOLDER})",
     )
 
     install_parser.add_argument(
@@ -105,14 +109,14 @@ def parse(parser):
 
     remove_parser.add_argument(
         "--runtimes-file",
-        default="runtimes/runtimes.json",
-        help="Path to the JSON file containing runtimes (default: runtimes/runtimes.json)",
+        default=os.path.join(script_dir, utils.DEFAULT_RUNTIMES_FILE),
+        help=f"Path to the JSON file containing runtimes (default: {utils.DEFAULT_RUNTIMES_FILE})",
     )
 
     remove_parser.add_argument(
         "--runtimes-folder",
-        default="runtimes",
-        help="Path to the folder containing runtimes (default: runtimes)",
+        default=os.path.join(script_dir, utils.DEFAULT_RUNTIMES_FOLDER),
+        help=f"Path to the folder containing runtimes (default: {utils.DEFAULT_RUNTIMES_FOLDER})",
     )
 
     # "version" command to get the version of all runtimes
@@ -124,14 +128,14 @@ def parse(parser):
 
     version_parser.add_argument(
         "--runtimes-file",
-        default="runtimes/runtimes.json",
-        help="Path to the JSON file containing runtimes (default: runtimes/runtimes.json)",
+        default=os.path.join(script_dir, utils.DEFAULT_RUNTIMES_FILE),
+        help=f"Path to the JSON file containing runtimes (default: {utils.DEFAULT_RUNTIMES_FILE})",
     )
 
     version_parser.add_argument(
         "--runtimes-folder",
-        default="runtimes",
-        help="Path to the folder containing runtimes (default: runtimes)",
+        default=os.path.join(script_dir, utils.DEFAULT_RUNTIMES_FOLDER),
+        help=f"Path to the folder containing runtimes (default: {utils.DEFAULT_RUNTIMES_FOLDER})",
     )
 
     # "update" command to update the runtimes
@@ -149,14 +153,14 @@ def parse(parser):
 
     update_parser.add_argument(
         "--runtimes-folder",
-        default="runtimes",
-        help="Path to the folder containing runtimes (default: runtimes)",
+        default=os.path.join(script_dir, utils.DEFAULT_RUNTIMES_FOLDER),
+        help=f"Path to the folder containing runtimes (default: {utils.DEFAULT_RUNTIMES_FOLDER})",
     )
 
     update_parser.add_argument(
         "--runtimes-file",
-        default="runtimes/runtimes.json",
-        help="Path to the JSON file containing runtimes (default: runtimes/runtimes.json)",
+        default=os.path.join(script_dir, utils.DEFAULT_RUNTIMES_FILE),
+        help=f"Path to the JSON file containing runtimes (default: {utils.DEFAULT_RUNTIMES_FILE})",
     )
 
     for subparser in subparsers.choices.values():
@@ -165,7 +169,7 @@ def parse(parser):
     return parser
 
 
-def list_runtimes(file="runtimes/runtimes.json"):
+def list_runtimes(file=utils.DEFAULT_RUNTIMES_FILE):
     """List installed runtimes.
 
     Args:
@@ -210,7 +214,7 @@ def list_runtimes(file="runtimes/runtimes.json"):
         return runtime_list["runtimes"]
 
 
-def get_runtime_from_name(name, file="runtimes/runtimes.json"):
+def get_runtime_from_name(name, file=utils.DEFAULT_RUNTIMES_FILE):
     """Get runtime information from a name.
 
     Args:
@@ -237,7 +241,7 @@ def get_runtime_from_name(name, file="runtimes/runtimes.json"):
     return None
 
 
-def _list_available_runtimes(installers_folder="installers"):
+def _list_available_runtimes(installers_folder=utils.DEFAULT_INSTALLERS_FOLDER):
     """List available runtimes.
 
     Args:
@@ -291,7 +295,7 @@ def _get_available_runtime_by_name(name, runtimes_list):
     return None
 
 
-def _add_runtime_to_runtimes_file(runtime, file="runtimes/runtimes.json"):
+def _add_runtime_to_runtimes_file(runtime, file=utils.DEFAULT_RUNTIMES_FILE):
     """Add a runtime to the runtimes.json file.
     It expects that the runtime does not exists in the file.
     """
@@ -310,7 +314,9 @@ def _add_runtime_to_runtimes_file(runtime, file="runtimes/runtimes.json"):
         logging.error(f"Failed to add runtime to {file}: {e}")
 
 
-def _execute_runtime_command(runtime, command_key, runtimes_folder="runtimes"):
+def _execute_runtime_command(
+    runtime, command_key, runtimes_folder=utils.DEFAULT_RUNTIMES_FOLDER
+):
     """Execute a runtime command (install/update).
 
     Args:
@@ -398,7 +404,7 @@ def _check_runtime_installation(runtime, runtimes_folder, benchmarks_folder):
     return runtime
 
 
-def _remove_runtime_from_runtimes_file(name, file="runtimes/runtimes.json"):
+def _remove_runtime_from_runtimes_file(name, file=utils.DEFAULT_RUNTIMES_FILE):
     """Remove a runtime from the runtimes.json file."""
 
     try:
@@ -416,7 +422,10 @@ def _remove_runtime_from_runtimes_file(name, file="runtimes/runtimes.json"):
 
 
 def _remove_runtime(
-    name, install_dir, runtimes_folder="runtimes", runtimes_file="runtimes.json"
+    name,
+    install_dir,
+    runtimes_folder=utils.DEFAULT_RUNTIMES_FOLDER,
+    runtimes_file=utils.DEFAULT_RUNTIMES_FILE,
 ):
     """Remove a runtime."""
 
@@ -439,7 +448,7 @@ def _remove_runtime(
     _remove_runtime_from_runtimes_file(name, runtimes_file)
 
 
-def _get_runtime_version(command, runtimes_folder="runtimes"):
+def _get_runtime_version(command, runtimes_folder=utils.DEFAULT_RUNTIMES_FOLDER):
     """Get the version of a runtime.
 
     Args:

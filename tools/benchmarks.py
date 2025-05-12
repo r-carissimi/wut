@@ -9,8 +9,6 @@ import os
 
 from . import utils
 
-DEFAULT_BENCHMARKS_FOLDER = "benchmarks"
-
 
 def parse(parser):
     """Parse command-line arguments for the benchmarks module.
@@ -18,6 +16,10 @@ def parse(parser):
     Args:
         parser (ArgumentParser): The argument parser to add subcommands to.
     """
+
+    # We use os.path.dirname two times because the script is in the tools
+    # folder and we want to get the runtimes folder.
+    script_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
     subparsers = parser.add_subparsers(dest="operation", required=True)
     list_parser = subparsers.add_parser(
@@ -28,8 +30,8 @@ def parse(parser):
 
     list_parser.add_argument(
         "--benchmarks-folder",
-        default=DEFAULT_BENCHMARKS_FOLDER,
-        help=f"Path to the folder containing benchmarks (default: {DEFAULT_BENCHMARKS_FOLDER}).",
+        default=os.path.join(script_dir, utils.DEFAULT_BENCHMARKS_FOLDER),
+        help=f"Path to the folder containing benchmarks (default: {utils.DEFAULT_BENCHMARKS_FOLDER}).",
     )
 
     for subparser in subparsers.choices.values():
@@ -98,7 +100,7 @@ def _parse_benchmark_json(file):
     ]
 
 
-def list_groups(folder=DEFAULT_BENCHMARKS_FOLDER):
+def list_groups(folder=utils.DEFAULT_BENCHMARKS_FOLDER):
     """List all groups in the benchmarks folder.
 
     Args:
@@ -129,7 +131,7 @@ def list_groups(folder=DEFAULT_BENCHMARKS_FOLDER):
     return groups
 
 
-def list_benchmarks(folder=DEFAULT_BENCHMARKS_FOLDER):
+def list_benchmarks(folder=utils.DEFAULT_BENCHMARKS_FOLDER):
     """List available benchmarks.
 
     Args:
@@ -170,7 +172,7 @@ def list_benchmarks(folder=DEFAULT_BENCHMARKS_FOLDER):
     return benchmarks
 
 
-def get_benchmark_from_name(name, folder=DEFAULT_BENCHMARKS_FOLDER):
+def get_benchmark_from_name(name, folder=utils.DEFAULT_BENCHMARKS_FOLDER):
     """Get benchmark information from a name.
     Args:
         name (str): Name of the benchmark. Can be a group name or a

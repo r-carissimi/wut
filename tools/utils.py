@@ -2,6 +2,13 @@ import json
 import logging
 import os
 
+DEFAULT_BENCHMARKS_FOLDER = "benchmarks"
+DEFAULT_RESULTS_FOLDER = "results"
+DEFAULT_RUNTIMES_FOLDER = "runtimes"
+DEFAULT_PLOTS_FOLDER = "plots"
+DEFAULT_INSTALLERS_FOLDER = "installers"
+DEFAULT_RUNTIMES_FILE = DEFAULT_RUNTIMES_FOLDER + "/runtimes.json"
+
 
 def add_log_level_argument(parser):
     """Add a --log-level argument to the parser."""
@@ -39,9 +46,9 @@ def load_results_file(file_path):
 
 
 def get_absolute_path(path):
-    """Get the absolute path of a given path. The path can be relative or absolute.
-    If the path is relative, it has to be relative to the project root.
-    The function assumes to be called from a script in the "tools" folder.
+    """Get the absolute path of a given path.
+    - If the path is absolute, return as is.
+    - If the path is relative, resolve relative to the user's current working directory.
 
     Args:
         path (str): The path to convert to an absolute path.
@@ -50,11 +57,7 @@ def get_absolute_path(path):
         str: The absolute path.
     """
 
-    # We use os.path.dirname two times because the script is in the tools
-    # folder and we want to get the runtimes folder.
+    if os.path.isabs(path):
+        return path
 
-    if not os.path.isabs(path):
-        script_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        path = os.path.join(script_dir, path)
-
-    return path
+    return os.path.abspath(os.path.join(os.getcwd(), path))

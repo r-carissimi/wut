@@ -11,6 +11,10 @@ from . import utils
 def parse(parser):
     """Parse command-line arguments for the runtime module."""
 
+    # We use os.path.dirname two times because the script is in the tools
+    # folder and we want to get the runtimes folder.
+    script_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
     parser.add_argument(
         "results_file",
         help="Path to the results file to plot",
@@ -19,8 +23,8 @@ def parse(parser):
 
     parser.add_argument(
         "--plots-folder",
-        default="plots",
-        help="Path to the folder where plots will be saved (default: plots)",
+        default=os.path.join(script_dir, utils.DEFAULT_PLOTS_FOLDER),
+        help=f"Path to the folder where plots will be saved (default: {utils.DEFAULT_PLOTS_FOLDER})",
     )
 
     utils.add_log_level_argument(parser)

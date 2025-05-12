@@ -1,6 +1,7 @@
 """Checks a benchmark suite on runtimes"""
 
 import logging
+import os
 
 from . import run, utils
 
@@ -11,6 +12,10 @@ def parse(parser):
     Args:
         parser (ArgumentParser): The argument parser to add subcommands to.
     """
+
+    # We use os.path.dirname two times because the script is in the tools
+    # folder and we want to get the runtimes folder.
+    script_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
     parser.add_argument(
         "benchmark",
@@ -28,20 +33,20 @@ def parse(parser):
 
     parser.add_argument(
         "--benchmarks-folder",
-        default="benchmarks",
-        help="Path to the folder containing benchmarks (default: benchmarks)",
+        default=os.path.join(script_dir, utils.DEFAULT_BENCHMARKS_FOLDER),
+        help=f"Path to the folder containing benchmarks (default: {utils.DEFAULT_BENCHMARKS_FOLDER})",
     )
 
     parser.add_argument(
         "--runtimes-file",
-        default="runtimes/runtimes.json",
-        help="Path to the JSON file containing runtimes (default: runtimes/runtimes.json)",
+        default=os.path.join(script_dir, utils.DEFAULT_RUNTIMES_FILE),
+        help=f"Path to the JSON file containing runtimes (default: {utils.DEFAULT_RUNTIMES_FILE})",
     )
 
     parser.add_argument(
         "--runtimes-folder",
-        default="runtimes",
-        help="Path to the folder containing runtimes (default: runtimes)",
+        default=os.path.join(script_dir, utils.DEFAULT_RUNTIMES_FOLDER),
+        help=f"Path to the folder containing runtimes (default: {utils.DEFAULT_RUNTIMES_FOLDER})",
     )
 
     utils.add_log_level_argument(parser)
