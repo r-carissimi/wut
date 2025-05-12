@@ -1,9 +1,10 @@
 import logging
 from argparse import ArgumentParser
 
-from tools import commands, utils
+from wasure.tools import commands, utils
 
-VERSION = "0.4α (2025-05-06)"
+VERSION_NUMBER = "0.5"
+VERSION = f"{VERSION_NUMBER}α (2025-05-12)"
 
 
 def setup_subparsers(parser, commands):

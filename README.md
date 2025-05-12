@@ -23,13 +23,13 @@
 
    ```bash
    git clone https://github.com/r-carissimi/wasure.git
-   cd wasure
+   cd wasure/wasure
    ```
 
 2. **Install dependencies:**
 
    ```bash
-   pip install -r requirements.txt
+   pip install -r ../requirements.txt
    ```
 
 
