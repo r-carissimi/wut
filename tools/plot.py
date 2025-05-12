@@ -173,8 +173,37 @@ def _normalize_values(benchmarks_list, benchmark_metrics, raw_values):
     return runtime_data
 
 
+def _all_benchmarks_single_runtime(statistics, benchmarks_list):
+    """Return True if every benchmark has only one runtime."""
+
+    for benchmark in benchmarks_list:
+        runtimes = [
+            runtime for runtime in statistics if benchmark in statistics[runtime]
+        ]
+        if len(runtimes) != 1:
+            return False
+    return True
+
+
+def _absolute_values(benchmarks_list, raw_values):
+    """Prepare absolute values for plotting (no normalization)."""
+
+    runtime_data = {
+        runtime: {"values": {}, "errors": {}}
+        for runtime in raw_values[benchmarks_list[0]]
+    }
+    for benchmark in benchmarks_list:
+        for runtime, data in raw_values[benchmark].items():
+            runtime_data[runtime]["values"][benchmark] = data["avg"]
+            runtime_data[runtime]["errors"][benchmark] = (
+                data["avg"] - data["min"],
+                data["max"] - data["avg"],
+            )
+    return runtime_data
+
+
 def _plot_results(
-    runtime_data, benchmarks_list, benchmark_metrics, results_file, plots_folder
+    runtime_data, benchmarks_list, benchmark_metrics, results_file, plots_folder, ylabel
 ):
     """Plot the normalized benchmark results with error bars and save the file."""
 
@@ -201,8 +230,8 @@ def _plot_results(
         )
 
     plt.grid(axis="y", linestyle="--", alpha=0.7)
-    plt.title("Benchmark Results Grouped by Runtime (Normalized %)")
-    plt.ylabel("Normalized Metric Value (%)")
+    plt.title("Benchmark Results Grouped by Runtime")
+    plt.ylabel(ylabel)
     plt.xlabel("Benchmark")
     plt.xticks(
         [pos + (len(runtime_data) - 1) * bar_width / 2 for pos in x],
@@ -217,7 +246,7 @@ def _plot_results(
     plot_path = os.path.join(plots_folder, plot_filename)
     plt.savefig(plot_path)
     plt.close()
-    logging.info(f"Saved grouped percentage plot with error bars to {plot_path}")
+    logging.info(f"Saved plot to {plot_path}")
 
 
 def main(args):
@@ -243,7 +272,13 @@ def main(args):
     raw_values = _transpose_benchmark_data(
         statistics, benchmarks_list, benchmark_metrics
     )
-    runtime_data = _normalize_values(benchmarks_list, benchmark_metrics, raw_values)
+
+    if _all_benchmarks_single_runtime(statistics, benchmarks_list):
+        runtime_data = _absolute_values(benchmarks_list, raw_values)
+        ylabel = "Absolute Metric Value"
+    else:
+        runtime_data = _normalize_values(benchmarks_list, benchmark_metrics, raw_values)
+        ylabel = "Normalized Metric Value (%)"
 
     _plot_results(
         runtime_data,
@@ -251,4 +286,5 @@ def main(args):
         benchmark_metrics,
         args.results_file,
         args.plots_folder,
+        ylabel,
     )
