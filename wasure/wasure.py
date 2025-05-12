@@ -3,7 +3,7 @@ from argparse import ArgumentParser
 
 from wasure.tools import commands, utils
 
-VERSION_NUMBER = "0.5"
+VERSION_NUMBER = "0.6"
 VERSION = f"{VERSION_NUMBER}α (2025-05-12)"
 
 
