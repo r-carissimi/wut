@@ -1,7 +1,7 @@
 **/.DS_Store
-results/
-plots/
-runtimes/
+wasure/results/
+wasure/plots/
+wasure/runtimes/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
