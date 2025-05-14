@@ -26,12 +26,19 @@ def parse(parser):
         help=f"Path to the folder where CSVs will be saved (default: {utils.DEFAULT_RESULTS_FOLDER})",
     )
 
+    parser.add_argument(
+        "--memory",
+        action="store_true",
+        default=False,
+        help="Include memory usage in the CSV file (default: False)",
+    )
+
     utils.add_log_level_argument(parser)
 
     return parser
 
 
-def _write_benchmark_results_to_csv(data, filename):
+def _write_benchmark_results_to_csv(data, filename, memory):
     """
     Writes every run of benchmark results to a CSV file.
 
@@ -52,6 +59,7 @@ def _write_benchmark_results_to_csv(data, filename):
                      The outer keys are benchmark names, and the inner
                      keys are runtime names.
         filename (str): The name of the CSV file to write to.
+        memory (bool): If True, include memory usage in the CSV.
     """
 
     logging.debug("Exporting every run to CSV")
@@ -68,6 +76,9 @@ def _write_benchmark_results_to_csv(data, filename):
             "score",
             "return_code",
         ]
+        if memory:
+            headers.extend(["max_memory_rss", "max_memory_vms"])
+
         writer.writerow(headers)
 
         for benchmark, runtimes in data.items():
@@ -81,6 +92,10 @@ def _write_benchmark_results_to_csv(data, filename):
                         run.get("score", ""),
                         run.get("return_code", ""),
                     ]
+                    if memory:
+                        row.append(run.get("stats", {}).get("max_memory_rss", ""))
+                        row.append(run.get("stats", {}).get("max_memory_rss", ""))
+
                     writer.writerow(row)
 
     logging.info(f"Results exported to {filename}")
@@ -103,4 +118,4 @@ def main(args):
         os.path.splitext(os.path.basename(args.results_file))[0] + ".csv",
     )
 
-    _write_benchmark_results_to_csv(results, filename)
+    _write_benchmark_results_to_csv(results, filename, args.memory)

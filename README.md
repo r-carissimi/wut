@@ -36,19 +36,6 @@ cd wasure
 pip install .
 ```
 
-### 🚧 Run Without Installing
-
-If you prefer not to install, you can run WASURE directly from the source. In this case, **replace every occurrence of `wasure` with `python3 wasure.py`** in the usage examples.
-
-Clone the repository and install dependencies:
-
-```bash
-git clone https://github.com/r-carissimi/wasure.git
-cd wasure/wasure
-pip install -r ../requirements.txt
-```
-
-
 
 ## 📖 How to Use WASURE
 
@@ -107,6 +94,9 @@ wasure run -b pystone dummy dhrystone/dhrystone10M -r wasmtime wasmedge wasmer -
 
 # Run a raw WebAssembly file directly
 wasure run -b py2wasm/pystone/pystone.wasm -r wasmtime
+
+# Run a benchmark tracking the memory consumption. Timings may increase.
+wasure run -b helloworld -r wasmtime
 ```
 
 #### Useful Flags
@@ -114,6 +104,7 @@ wasure run -b py2wasm/pystone/pystone.wasm -r wasmtime
 - `--repeat N`: Repeat each benchmark N times
 - `--no-store-output`: Don’t save output, just timings
 - `--results-folder <path>`: Define custom output directory
+- `--memory`: Pool the memory consumption
 
 
 
@@ -128,6 +119,21 @@ wasure plot /path/to/results/2025-05-06_10-56-21.json
 # Export results to CSV
 wasure export /path/to/results/2025-05-06_10-56-21.json
 ```
+
+#### 📄 Exported CSV Structure
+
+When you export benchmark results to CSV, each row contains the following columns:
+
+| Column            | Description                                                |
+|-------------------|------------------------------------------------------------|
+| `benchmark`       | Name of the benchmark or WebAssembly file                  |
+| `runtime`         | Name of the runtime used                                   |
+| `run_index`       | Index of the run (for repeated benchmarks)                 |
+| `elapsed_time`    | Execution time in nanoseconds                              |
+| `score`           | Benchmark-specific score (if applicable, else 0)           | 
+| `return_code`     | Process return code (0 means success)                      |
+| `max_memory_rss`  | Maximum resident set size in bytes, if `--memory` is set   |
+| `max_memory_vms`  | Maximum virtual memory size in bytes, if `--memory` is set |
 
 
 

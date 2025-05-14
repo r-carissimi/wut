@@ -12,6 +12,8 @@ import re
 import subprocess
 import time
 
+import psutil
+
 from . import benchmarks, runtimes, utils
 
 
@@ -80,6 +82,13 @@ def parse(parser):
         type=int,
         default=1,
         help="Number of times to repeat each benchmark (default: 1)",
+    )
+
+    parser.add_argument(
+        "--memory",
+        action="store_true",
+        default=False,
+        help="Pool memory usage for the benchmark (default: False)",
     )
 
     utils.add_log_level_argument(parser)
@@ -205,7 +214,12 @@ def _parse_score(output, score_parser):
 
 
 def _run_benchmark_with_runtime(
-    benchmark, runtime, benchmarks_folder, runtimes_folder, precompiled_path=None
+    benchmark,
+    runtime,
+    benchmarks_folder,
+    runtimes_folder,
+    precompiled_path=None,
+    pool_memory=False,
 ):
     """Run a benchmark with a given runtime.
 
@@ -222,7 +236,7 @@ def _run_benchmark_with_runtime(
                * score: The score of the benchmark (if applicable)
                * return code: The return code of the benchmark
                * output: The output of the benchmark as a string
-               * stats: A dictionary containing the parsed stats from the output
+               * stats: A dictionary containing the parsed stats
     """
 
     benchmarks_folder = utils.get_absolute_path(benchmarks_folder)
@@ -267,9 +281,30 @@ def _run_benchmark_with_runtime(
         stderr=subprocess.PIPE,
         cwd=runtimes_folder,
     )
+
+    # If pool_memory is True, we will monitor the memory usage of the process
+    if pool_memory:
+        max_memory_rss = 0
+        max_memory_vms = 0
+        proc = psutil.Process(process.pid)
+        try:
+            while process.poll() is None:
+                mem_info = proc.memory_info()
+                max_memory_rss = max(max_memory_rss, mem_info.rss)
+                max_memory_vms = max(max_memory_vms, mem_info.vms)
+                time.sleep(0.01)
+        except psutil.NoSuchProcess:
+            pass
+
     stdout, stderr = process.communicate()
     end_time = time.perf_counter_ns()
     elapsed_time = end_time - start_time
+
+    logging.debug(f"Elapsed time: {elapsed_time} ns")
+
+    if pool_memory:
+        logging.debug(f"Max RSS memory: {max_memory_rss / 1024} KB")
+        logging.debug(f"Max VMS memory: {max_memory_vms / 1024} KB")
 
     output = stdout.decode().strip() + stderr.decode().strip()
     logging.debug(f"Output: {output}")
@@ -297,6 +332,10 @@ def _run_benchmark_with_runtime(
         for stat_name, stat_regex in (runtime.get("stats-parser") or {}).items()
         if (match := re.search(stat_regex, output))
     }
+
+    if pool_memory:
+        stats["max_memory_rss"] = max_memory_rss
+        stats["max_memory_vms"] = max_memory_vms
 
     return elapsed_time, score, process.returncode, output, stats
 
@@ -397,6 +436,7 @@ def _run_benchmarks(
     runtimes_folder,
     repeat=1,
     no_store_output=False,
+    pool_memory=False,
 ):
     """Runs benchmarks for each runtime and collects results."""
 
@@ -417,6 +457,7 @@ def _run_benchmarks(
                 runtimes_folder,
                 repeat,
                 no_store_output,
+                pool_memory,
             )
 
     return results
@@ -429,6 +470,7 @@ def run_benchmark_iterations(
     runtimes_folder,
     repeat=1,
     no_store_output=False,
+    pool_memory=False,
 ):
     """Runs multiple iterations of a benchmark and collects results.
 
@@ -463,6 +505,7 @@ def run_benchmark_iterations(
             benchmarks_folder,
             runtimes_folder,
             precompiled_path,
+            pool_memory,
         )
 
         if return_code != 0:
@@ -521,6 +564,7 @@ def main(args):
         runtimes_folder,
         args.repeat,
         args.no_store_output,
+        args.memory,
     )
 
     # Save results
