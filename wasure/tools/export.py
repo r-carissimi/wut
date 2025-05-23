@@ -46,7 +46,7 @@ def _write_benchmark_results_to_csv(data, filename, memory):
     {
         "benchmark_name": {
             "runtime1": [
-                {"elapsed_time": value1, "score": value2, ...},
+                {"elapsed_time_ns": value1, "score": value2, ...},
                 ...
             ],
             ...
@@ -72,12 +72,12 @@ def _write_benchmark_results_to_csv(data, filename, memory):
             "benchmark",
             "runtime",
             "run_index",
-            "elapsed_time",
+            "elapsed_time_ns",
             "score",
             "return_code",
         ]
         if memory:
-            headers.extend(["max_memory_rss", "max_memory_vms"])
+            headers.extend(["max_rss_bytes", "max_vms_bytes"])
 
         writer.writerow(headers)
 
@@ -88,13 +88,13 @@ def _write_benchmark_results_to_csv(data, filename, memory):
                         benchmark,
                         runtime,
                         run_index + 1,
-                        run.get("elapsed_time", ""),
+                        run.get("elapsed_time_ns", ""),
                         run.get("score", ""),
                         run.get("return_code", ""),
                     ]
                     if memory:
-                        row.append(run.get("stats", {}).get("max_memory_rss", ""))
-                        row.append(run.get("stats", {}).get("max_memory_rss", ""))
+                        row.append(run.get("stats", {}).get("max_rss_bytes", ""))
+                        row.append(run.get("stats", {}).get("max_vms_bytes", ""))
 
                     writer.writerow(row)
 

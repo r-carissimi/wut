@@ -334,8 +334,8 @@ def _run_benchmark_with_runtime(
     }
 
     if pool_memory:
-        stats["max_memory_rss"] = max_memory_rss
-        stats["max_memory_vms"] = max_memory_vms
+        stats["max_rss_bytes"] = max_memory_rss
+        stats["max_vms_bytes"] = max_memory_vms
 
     return elapsed_time, score, process.returncode, output, stats
 
@@ -516,7 +516,7 @@ def run_benchmark_iterations(
 
         iterations_results.append(
             {
-                "elapsed_time": elapsed_time,
+                "elapsed_time_ns": elapsed_time,
                 "score": score,
                 "return_code": return_code,
                 **({"output": output} if not no_store_output else {}),

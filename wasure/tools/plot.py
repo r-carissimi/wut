@@ -39,15 +39,15 @@ def _compute_statistics(results):
     for runtime, benchmarks in results.items():
         statistics[runtime] = {}
         for benchmark, runs in benchmarks.items():
-            # filters out runs with elapsed_time <= 0.
-            runs = [run for run in runs if run["elapsed_time"] > 0]
+            # filters out runs with elapsed_time_ns <= 0.
+            runs = [run for run in runs if run["elapsed_time_ns"] > 0]
             if not runs:
                 continue
 
-            elapsed_times = [run["elapsed_time"] for run in runs]
+            elapsed_times = [run["elapsed_time_ns"] for run in runs]
             scores = [run["score"] for run in runs]
             statistics[runtime][benchmark] = {
-                "elapsed_time": {
+                "elapsed_time_ns": {
                     "avg": sum(elapsed_times) / len(elapsed_times),
                     "min": min(elapsed_times),
                     "max": max(elapsed_times),
@@ -77,7 +77,7 @@ def _collect_benchmarks(results):
 
 def _determine_benchmark_metrics(results, benchmarks_list):
     """Determine the metric to use for each benchmark.
-    If any runtime has a score > 0, use score; otherwise, use elapsed_time.
+    If any runtime has a score > 0, use score; otherwise, use elapsed_time_ns.
     """
 
     benchmark_metrics = {}
@@ -87,7 +87,7 @@ def _determine_benchmark_metrics(results, benchmarks_list):
             for runtime in results
             if benchmark in results[runtime]
         )
-        benchmark_metrics[benchmark] = "score" if use_score else "elapsed_time"
+        benchmark_metrics[benchmark] = "score" if use_score else "elapsed_time_ns"
 
     return benchmark_metrics
 

@@ -156,11 +156,11 @@ When you export benchmark results to CSV, each row contains the following column
 | `benchmark`       | Name of the benchmark or WebAssembly file                  |
 | `runtime`         | Name of the runtime used                                   |
 | `run_index`       | Index of the run (for repeated benchmarks)                 |
-| `elapsed_time`    | Execution time in nanoseconds                              |
+| `elapsed_time_ns` | Execution time in nanoseconds                              |
 | `score`           | Benchmark-specific score (if applicable, else 0)           | 
 | `return_code`     | Process return code (0 means success)                      |
-| `max_memory_rss`  | Maximum resident set size in bytes, if `--memory` is set   |
-| `max_memory_vms`  | Maximum virtual memory size in bytes, if `--memory` is set |
+| `max_rss_bytes`   | Maximum resident set size in bytes, if `--memory` is set   |
+| `max_vms_bytes`   | Maximum virtual memory size in bytes, if `--memory` is set |
 
 
 
