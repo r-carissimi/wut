@@ -19,22 +19,49 @@
 
 ## 🛠 Getting Started
 
-### 📦 Quick Install (Recommended)
+### Quick Install
 
 Install the latest released version from PyPI:
 
 ```bash
-pip install wasure
+pip3 install wasure
 ```
 
-### 🛠 Install Latest Version from GitHub
-If you want the newest features or fixes, install directly from the repository:
+> [!WARNING]
+> Updating the pip package **will delete all changes made**, including benchmark results, installed runtimes, saved plots, and custom benchmarks. To avoid this, you can either:
+> - Use a custom directory for these data (by using the relevant flags, such as `--runtimes-folder`) 
+> - Back up any important data beforehand
+> - Use `wasure` from source, without installing it
+
+
+
+
+### Run Without Installing
+
+Run the project from source, without installing it. This will provide the newest version.
+
+```bash
+git clone https://github.com/r-carissimi/wasure.git
+cd wasure
+pip3 install -r requirements.txt
+python3 -m wasure
+```
+
+> [!NOTE]
+> While following the instructions below, be sure to replace `wasure` with `python3 -m wasure`
+
+
+
+### Install Latest Version from GitHub
+
+If you want to install the newest features or fixes, install directly from the repository:
 
 ```bash
 git clone https://github.com/r-carissimi/wasure.git
 cd wasure
 pip install .
 ```
+
 
 
 ## 📖 How to Use WASURE
