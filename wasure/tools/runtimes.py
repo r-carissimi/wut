@@ -521,6 +521,13 @@ def main(args):
             print(f"Runtime {args.name} is already installed.")
             return
 
+        # Remove folder if it exists
+        install_dir = os.path.join(args.runtimes_folder, runtime["install-dir"])
+        logging.debug(f"Checking if {install_dir} already exists")
+        if os.path.exists(install_dir):
+            shutil.rmtree(install_dir)
+            logging.info(f"Removed {install_dir} folder.")
+
         # Install the runtime
         if _execute_runtime_command(runtime, "install-command", args.runtimes_folder):
             if not args.no_runtime_check:
