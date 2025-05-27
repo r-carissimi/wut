@@ -1,7 +1,7 @@
 (module
   (memory (;0;) 0)
   (memory (;1;) 0)
-  (func (export "_start") 
+  (func (export "_start") (export "main")
     nop
   )
 )
