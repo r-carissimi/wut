@@ -3,8 +3,8 @@ from argparse import ArgumentParser
 
 from wasure.tools import commands, utils
 
-VERSION_NUMBER = "0.8"
-VERSION = f"{VERSION_NUMBER}α (2025-05-27)"
+VERSION_NUMBER = "0.9"
+VERSION = f"{VERSION_NUMBER}α (2025-06-17)"
 
 
 def setup_subparsers(parser, commands):
