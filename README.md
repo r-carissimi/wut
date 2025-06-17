@@ -132,6 +132,7 @@ wasure run -b helloworld -r wasmtime
 - `--no-store-output`: Don’t save output, just timings
 - `--results-folder <path>`: Define custom output directory
 - `--memory`: Pool the memory consumption
+- `--timeout N`: Stop benchmarks after N seconds
 
 
 
