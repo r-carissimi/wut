@@ -91,6 +91,13 @@ def parse(parser):
         help="Pool memory usage for the benchmark (default: False)",
     )
 
+    parser.add_argument(
+        "--timeout",
+        type=int,
+        default=None,
+        help="Maximum time in seconds for each benchmark to run. If not specified, no timeout is applied.",
+    )
+
     utils.add_log_level_argument(parser)
 
     return parser
@@ -220,6 +227,7 @@ def _run_benchmark_with_runtime(
     runtimes_folder,
     precompiled_path=None,
     pool_memory=False,
+    timeout_seconds=None,
 ):
     """Run a benchmark with a given runtime.
 
@@ -282,21 +290,42 @@ def _run_benchmark_with_runtime(
         cwd=runtimes_folder,
     )
 
-    # If pool_memory is True, we will monitor the memory usage of the process
-    if pool_memory:
-        max_memory_rss = 0
-        max_memory_vms = 0
-        proc = psutil.Process(process.pid)
-        try:
+    max_memory_rss = 0
+    max_memory_vms = 0
+
+    try:
+        # if pool_memory is True, we will monitor the memory usage of the process
+        if pool_memory:
+            proc = psutil.Process(process.pid)
+            start = time.time()
             while process.poll() is None:
+                if timeout_seconds and time.time() - start > timeout_seconds:
+                    process.kill()
+                    raise subprocess.TimeoutExpired(command, timeout_seconds)
                 mem_info = proc.memory_info()
                 max_memory_rss = max(max_memory_rss, mem_info.rss)
                 max_memory_vms = max(max_memory_vms, mem_info.vms)
                 time.sleep(0.01)
-        except psutil.NoSuchProcess:
-            pass
+            stdout, stderr = process.communicate()
+        else:
+            # if pool_memory is False, we wait for the process to finish.
+            # timeout_seconds is used to limit the maximum time the benchmark
+            # can run. Is None by default.
+            stdout, stderr = process.communicate(timeout=timeout_seconds)
 
-    stdout, stderr = process.communicate()
+    except subprocess.TimeoutExpired:
+        process.kill()
+        logging.warning(f"Benchmark timed out after {timeout_seconds} seconds")
+        stdout, stderr = process.communicate()
+        elapsed_time = time.perf_counter_ns() - start_time
+        return (
+            elapsed_time,
+            0,
+            -1,
+            stdout.decode().strip() + stderr.decode().strip(),
+            {},
+        )
+
     end_time = time.perf_counter_ns()
     elapsed_time = end_time - start_time
 
@@ -437,6 +466,7 @@ def _run_benchmarks(
     repeat=1,
     no_store_output=False,
     pool_memory=False,
+    timeout_seconds=None,
 ):
     """Runs benchmarks for each runtime and collects results."""
 
@@ -458,6 +488,7 @@ def _run_benchmarks(
                 repeat,
                 no_store_output,
                 pool_memory,
+                timeout_seconds,
             )
 
     return results
@@ -471,6 +502,7 @@ def run_benchmark_iterations(
     repeat=1,
     no_store_output=False,
     pool_memory=False,
+    timeout_seconds=None,
 ):
     """Runs multiple iterations of a benchmark and collects results.
 
@@ -481,6 +513,8 @@ def run_benchmark_iterations(
         runtimes_folder (str): The folder containing the runtimes.
         repeat (int): Number of times to repeat the benchmark.
         no_store_output (bool): If True, do not store the output of the benchmark.
+        pool_memory (bool): If True, pool memory usage for the benchmark.
+        timeout_seconds (int): Maximum time in seconds for each benchmark to run.
 
     Returns:
         list: A list of dictionaries containing the results of each iteration.
@@ -506,6 +540,7 @@ def run_benchmark_iterations(
             runtimes_folder,
             precompiled_path,
             pool_memory,
+            timeout_seconds,
         )
 
         if return_code != 0:
@@ -565,6 +600,7 @@ def main(args):
         args.repeat,
         args.no_store_output,
         args.memory,
+        args.timeout,
     )
 
     # Save results
